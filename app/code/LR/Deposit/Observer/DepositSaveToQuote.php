@@ -13,7 +13,7 @@ class DepositSaveToQuote implements ObserverInterface
      * @param Data $helper
      */
     public function __construct(
-        Data $helper 
+        Data $helper
     ) {
         $this->helper = $helper;
     }
