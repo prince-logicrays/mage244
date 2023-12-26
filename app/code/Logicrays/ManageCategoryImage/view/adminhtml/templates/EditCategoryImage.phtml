@@ -1,0 +1,339 @@
+<?php
+    $setSelectedCategory = $block->setSelectedCategory();
+    $setSelectedAttributes = $block->setSelectedAttributes();
+    $allCates = $block->getAllParentCategories();
+    $allAttributes = $block->getAllAttributes();
+    $currentCateData = $block->getCurrentCategoryData();
+    $mediaUrl = $block->getMediaUrl();
+
+?>
+
+<script>
+    require([
+        'jquery',
+        'mage/validation'
+    ], function($){
+        var i = 1;
+        var a = 1;
+
+        $('#add-attribute-option').click(function(){
+            var cloneNode = $('#category-edit-form tbody tr:last').html(),
+                updateNewRow = cloneNode.replaceAll('attributeoption_option_0', 'attributeoption_option_'+i).replace('disabled="disabled"', '');
+                // updateNewRow = cloneNode.replace('disabled="disabled"', '');
+                $('#attribute_options tbody').append(`<tr class="row" id="attributeoption-image_${i}">${updateNewRow}</tr>`);
+            i++;
+
+            disableRemoveBtn();
+        });
+
+        $('.category-submit-form').on('click', function(e) {
+            $('#category-edit-form').submit();
+        });
+
+        function disableRemoveBtn() {
+            if ($('#category-edit-form tbody tr').length === 1) {
+                $('#category-edit-form tbody tr').find('.remove-attribute-option').attr('disabled', true);
+            } else {
+                $('#category-edit-form tbody tr').find('.remove-attribute-option').attr('disabled', false);
+            }
+        }
+    });
+
+    function removeRowBtn(ele) {
+        ele.closest('tr').remove();
+        if (document.querySelectorAll('#category-edit-form tbody tr').length === 1) {
+            document.querySelector('.remove-attribute-option').setAttribute('disabled', 'disabled');
+        }
+    }
+</script>
+
+<div>
+    <div class="page-main-actions">
+        <div class="page-actions">
+            <div class="page-actions-inner">
+                <div class="page-actions-buttons">
+                    <button onclick="window.location.href='<?= /** noEscap */ $block->getBackeUrl()?>'">Back</button>
+                    <button onclick="window.location.href='<?= /** noEscap */ $block->getDeleteUrl()?>'">Delete</button>
+                    <button type="submit" class="action-scalable primary category-submit-form submit">Save & Continue</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <form id="category-edit-form" action="<?= /** noEscap */ $block->getFormAction() ?>" method="post"
+        enctype="multipart/form-data" data-mage-init='{"validation": {}}' style="margin-bottom: 40px;">
+        <input name="form_key" type="hidden" value="<?= /** noEscap */ $block->getFormKey() ?>" />
+        <input name="id" type="hidden" value="<?= /** noEscap */ $block->getCurrentEditId() ?>" />
+
+        <fieldset class="admin__fieldset">
+            <div class="admin__field _required">
+                <div class="admin__field-label">
+                    <label for="category_id">
+                        <span>Select Category</span>
+                    </label>
+                </div>
+                <div class="admin__field-control _with-tooltip">
+                    <select class="admin__control-select" id="category_id" name="category_id"
+                        class="required-entry" data-validate="{required:true}">
+                        <option value="">-- Please Select --</option>
+                        <?php foreach ($allCates as $cate): ?>
+                            <option value="<?= /** noEscap */ $cate['value'] ?>"
+                                <?= ($setSelectedCategory == $cate['value']) ? 'selected' : '' ?>>
+                                <?= /** noEscap */ $cate['label'] ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+            </div>
+
+            <div class="admin__field _required">
+                <div class="admin__field-label">
+                    <label for="multi-select">
+                        <span>Select Product Attributes</span>
+                    </label>
+                </div>
+                <div class="admin__field-control _with-tooltip">
+                    <select multiple="" class="admin__control-multiselect" name="attributes[]"
+                        multiple="multiple" size="6" data-validate="{required:true}">
+                        <?php foreach ($allAttributes as $attribute): ?>
+                            <option value="<?= /** noEscap */ $attribute['value'] ?>"
+                                <?= (in_array($attribute['value'], $setSelectedAttributes)) ? 'selected' : '' ?>>
+                                <?= /** noEscap */ $attribute['label'] ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+            </div>
+        </fieldset>
+
+        <div class="form-grid-fields-group" style="overflow: auto">
+            <table class="data-grid data-table" id="attribute_options" style="margin: 30px 0">
+                <thead>
+                    <tr>
+                        <?php $optionCount = 1; ?>
+                        <?php foreach ($allAttributes as $attribute): ?>
+                            <?php if ((in_array($attribute['value'], $setSelectedAttributes))) { ?>
+                                <th class="data-grid-th">
+                                    <?= /** noEscap */ $attribute['label'];?>
+                                    <?php $optionCount++; ?>
+                                </th>
+                            <?php } ?>
+                        <?php endforeach; ?>
+
+                        <th class="data-grid-th">
+                            <span class="data-grid-cell-content">Image</span>
+                        </th>
+                        <th class="data-grid-th">
+                            <span class="data-grid-cell-content">Actions</span>
+                        </th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <?php
+                        if ($currentCateData) {
+                            echo 'Records Found';
+                        } else {
+                            echo 'No Records Found';
+                        }
+                    ?>
+                    <!-- data from table starts -->
+                    <?php $i = 0; ?>
+                    <?php foreach ($currentCateData as $key => $savedData) {
+                        // print_r($savedData);
+                        echo $savedData['id'];
+                        // echo $savedData['attribute_options'];
+                        $savedAttriOptions = json_decode($savedData['attribute_options'], true);
+                        // print_r($savedAttriOptions);
+                        ?><br>
+                        <tr class="row" id="attributeoption_image_<?= /** noEscap */ $savedData['id'];?>">
+                        <?php $optionCount = 1; ?>
+                        <?php foreach ($allAttributes as $attribute): ?>
+                            <?php if ((in_array($attribute['value'], $setSelectedAttributes))) { ?>
+                                <td class="label">
+                                    <?php
+                                    $attributesOptions = $block->getAttributeOptionByCode($attribute['value']);
+                                    if (count($attributesOptions) >= 1) { ?>
+                                        <select class="admin__control-select" data-validate="{required:true}"
+                                        id="edit_attributeoption_option_<?= /** noEscap */ $savedData['id'].'_'.$attribute['value'];?>"
+                                        name="edit_attributeoption_option_<?= /** noEscap */ $savedData['id'].'_'.$attribute['value'];?>[]">
+                                            <option value="">-- Please Select --</option>
+                                            <?php foreach ($attributesOptions as $attributesOptionsValue): ?>
+                                                <?php if ($attributesOptionsValue['value']) { ?>
+                                                    <?php
+                                                    // // print_r($attributesOptionsValue);
+                                                    // // print_r($savedAttriOptions);
+                                                    // echo $attributesOptionsValue['value'];
+                                                    // // die;
+                                                    $isSelected = false;
+                                                    if (array_key_exists($attribute['value'], $savedAttriOptions) && $savedAttriOptions[$attribute['value']] == $attributesOptionsValue['value']) {
+                                                        $isSelected = true;
+                                                    }
+                                                    ?>
+
+                                                    <option value="<?= /** noEscap */ $attributesOptionsValue['value']?>" <?= $isSelected ? 'selected' : ''?> >
+                                                        <?= /** noEscap */ $attributesOptionsValue['label'] ?>
+                                                    </option>
+                                                <?php } ?>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        <?php } ?>
+                                    <?php $optionCount++; ?>
+                                </td>
+                        <?php } ?>
+                        <?php endforeach; ?>
+                        <td>
+                            <input type="file" id="edit_attributeoption_option_<?= /** noEscap */ $savedData['id'];?>_image"
+                            name="edit_attributeoption_option_<?= /** noEscap */ $savedData['id'];?>_image" >
+                            <div id="saved_imagepreview">
+                            <a href="<?= /** noEscap */ $mediaUrl.$savedData['image'];?>" target="_blank">
+                                <img id="saved_previewimage" src="<?= /** noEscap */ $mediaUrl.$savedData['image'];?>"
+                                alt="Image Preview">
+                                </a>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="admin__control-table">
+                                <button type="button" onclick="removeRowBtn(this)"
+                                    class="action-delete remove-attribute-option"
+                                    disabled style="color: #514943;text-decoration: none;" id="remove-attribute-option">
+                                    <span>Remove</span>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    <?php } //end foreach for saved data?>
+                    <!-- data from table ends -->
+                    <tr class="row" id="attributeoption-image">
+                        <?php $optionCount = 1; ?>
+                        <?php foreach ($allAttributes as $attribute): ?>
+                            <?php if ((in_array($attribute['value'], $setSelectedAttributes))) { ?>
+                                <td class="label">
+                                    <?php
+                                    $attributesOptions = $block->getAttributeOptionByCode($attribute['value']);
+
+                                    if (count($attributesOptions) >= 1) { ?>
+                                        <select class="admin__control-select" data-validate="{required:true}"
+                                        id="attributeoption_option_0_<?= /** noEscap */ $attribute['value'];?>"
+                                        name="attributeoption_option_0_<?= /** noEscap */ $attribute['value'];?>[]">
+                                            <option value="">-- Please Select --</option>
+                                            <?php foreach ($attributesOptions as $attributesOptionsValue): ?>
+                                                <?php if ($attributesOptionsValue['value']) { ?>
+                                                <option value="<?= /** noEscap */ $attributesOptionsValue['value'] ?>">
+                                                    <?= /** noEscap */ $attributesOptionsValue['label'] ?>
+                                                </option>
+                                                <?php } ?>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        <?php } ?>
+                                    <?php $optionCount++; ?>
+                                </td>
+                        <?php } ?>
+                        <?php endforeach; ?>
+                        <td>
+                            <input type="file" id="attributeoption_option_0_image"
+                            name="attributeoption_option_0_image" data-validate="{required:true}">
+                            <div id="imagePreview">
+                                <img id="previewImage" src="#" alt="Image Preview">
+                            </div>
+                        </td>
+                        <td>
+                            <div class="admin__control-table">
+                                <button type="button" onclick="removeRowBtn(this)"
+                                    class="action-delete remove-attribute-option"
+                                    disabled style="color: #514943;text-decoration: none;" id="remove-attribute-option">
+                                    <span>Remove</span>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </form>
+    <a class="type-submit submit abs-action-primary abs-action-l"
+        href="javascript:void(0);" id="add-attribute-option">Add New</a>
+</div>
+
+<script>
+require([
+    'jquery',
+    'mage/validation'
+], function($){
+
+    $("#attribute_options").on('click', '#add-attribute-option', function() {
+        var currentRow = $(this).closest("tr");
+        console.log('currentRow ', currentRow);
+
+    });
+});
+</script>
+
+<style>
+    .data-grid tbody tr:nth-child(even) td {
+        background: #f5f5f5;
+    }
+</style>
+
+<style>
+    .data-grid tbody tr:nth-child(even) td {
+        background: #f5f5f5;
+    }
+    #imagePreview {
+        display: none;
+        max-width: 300px;
+        max-height: 300px;
+        margin-top: 10px;
+    }
+
+    #previewImage {
+        max-width: 50px;
+        width: 100%;
+        height: auto;
+    }
+    #saved_imagepreview {
+        max-width: 300px;
+        max-height: 300px;
+        margin-top: 10px;
+    }
+
+    #saved_previewimage {
+        max-width: 80px;
+        width: 100%;
+        height: auto;
+    }
+
+</style>
+
+<script>
+    require([
+    'jquery',
+    'mage/validation'
+], function($){
+    $(document).ready(function() {
+        $('#attributeoption_option_0_image').change(function() {
+            var file = this.files[0];
+
+            if (file) {
+                var reader = new FileReader();
+
+                reader.onload = function(e) {
+                    $('#previewImage').attr('src', e.target.result);
+                    $('#imagePreview').show();
+                };
+
+                reader.readAsDataURL(file);
+            } else {
+                $('#previewImage').attr('src', '');
+                $('#imagePreview').hide();
+            }
+        });
+    });
+});
+</script>
+
+<?php
+    echo '<pre>';
+    print_r($currentCateData);
+    // die;
+?>

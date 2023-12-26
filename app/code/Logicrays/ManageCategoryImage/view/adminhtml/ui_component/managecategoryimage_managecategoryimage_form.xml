@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- /**
+ * Logicrays
+ *
+ * DISCLAIMER
+ *
+ * Do not edit or add to this file if you wish to upgrade this extension to newer
+ * version in the future.
+ *
+ * @category    Logicrays
+ * @package     Logicrays_ManageCategoryImage
+ * @copyright   Copyright (c) Logicrays (https://www.logicrays.com/)
+ */ -->
+
+<form xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <argument name="data" xsi:type="array">
+        <item name="js_config" xsi:type="array">
+            <item name="provider" xsi:type="string">managecategoryimage_managecategoryimage_form.managecategoryimage_managecategoryimage_form_data_source</item>
+            <item name="deps" xsi:type="string">managecategoryimage_managecategoryimage_form.managecategoryimage_managecategoryimage_form_data_source</item>
+        </item>
+        <item name="label" xsi:type="string" translate="true">Manage Category Image</item>
+        <item name="config" xsi:type="array">
+            <item name="dataScope" xsi:type="string">data</item>
+            <item name="namespace" xsi:type="string">managecategoryimage_managecategoryimage_form</item>
+        </item>
+        <item name="spinner" xsi:type="string">general_information</item>
+        <item name="buttons" xsi:type="array">
+            <item name="back" xsi:type="array">
+                <item name="name" xsi:type="string">Back</item>
+                <item name="label" xsi:type="string" translate="true">Back</item>
+                <item name="class" xsi:type="string">back</item>
+                <item name="url" xsi:type="string">*/*/index</item>
+            </item>
+            <item name="delete" xsi:type="string">Logicrays\ManageCategoryImage\Block\Adminhtml\Button\Delete</item>
+            <item name="save" xsi:type="string">Logicrays\ManageCategoryImage\Block\Adminhtml\Button\Save</item>
+        </item>
+        <item name="template" xsi:type="string">templates/form/collapsible</item>
+    </argument>
+    <dataSource name="managecategoryimage_managecategoryimage_form_data_source">
+        <argument name="dataProvider" xsi:type="configurableObject">
+            <argument name="class" xsi:type="string">Logicrays\ManageCategoryImage\Model\DataProvider</argument>
+            <argument name="name" xsi:type="string">managecategoryimage_managecategoryimage_form_data_source</argument>
+            <argument name="primaryFieldName" xsi:type="string">id</argument>
+            <argument name="requestFieldName" xsi:type="string">id</argument>
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="submit_url" xsi:type="url" path="*/*/save" />
+                </item>
+            </argument>
+        </argument>
+        <argument name="data" xsi:type="array">
+            <item name="js_config" xsi:type="array">
+                <item name="component" xsi:type="string">Magento_Ui/js/form/provider</item>
+            </item>
+        </argument>
+    </dataSource>
+    <fieldset name="managecategoryimage_details">
+        <argument name="data" xsi:type="array">
+            <item name="config" xsi:type="array">
+                <item name="label" xsi:type="string" translate="true"></item>
+                <item name="sortOrder" xsi:type="number">20</item>
+            </item>
+        </argument>
+
+        <field name="category_id" formElement="select" sortOrder="10">
+            <argument name="data" xsi:type="array">
+                <item name="options" xsi:type="object">Logicrays\ManageCategoryImage\Ui\Component\Category\Options</item>
+                <item name="config" xsi:type="array">
+                    <item name="source" xsi:type="string">Categories</item>
+                </item>
+            </argument>
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Select Category</label>
+                <dataScope>category_id</dataScope>
+                <validation>
+                    <rule name="required-entry" xsi:type="boolean">true</rule>
+                </validation>
+            </settings>
+        </field>
+
+        <field name="attributes" formElement="multiselect" sortOrder="20">
+            <argument name="data" xsi:type="array">
+                <item name="options" xsi:type="object">Logicrays\ManageCategoryImage\Ui\Component\ProductAttributes\Options</item>
+                <item name="config" xsi:type="array">
+                    <item name="source" xsi:type="string">attributes</item>
+                </item>
+            </argument>
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Select Product Attributes</label>
+                <dataScope>attributes</dataScope>
+                <validation>
+                    <rule name="required-entry" xsi:type="boolean">true</rule>
+                </validation>
+            </settings>
+        </field>
+
+    </fieldset>
+</form>

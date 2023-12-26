@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/**
+ * Logicrays
+ *
+ * DISCLAIMER
+ *
+ * Do not edit or add to this file if you wish to upgrade this extension to newer
+ * version in the future.
+ *
+ * @category    Logicrays
+ * @package     Logicrays_EmailFilter
+ * @copyright   Copyright (c) Logicrays (https://www.logicrays.com/)
+ */ 
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+	<event name='controller_action_predispatch_customer_account_createpost'>
+        <observer name='logicrays_customer_account_createpost' instance='Logicrays\EmailFilter\Observer\CreateAccount' />
+    </event> 
+    <event name="controller_action_postdispatch_contact_index_post">
+        <observer name="logicrays_contactus_index_post" instance="Logicrays\EmailFilter\Observer\SendContactConfirmationEmail" />
+    </event>
+    <event name="newsletter_subscriber_save_before">
+        <observer name="logicrays_newsletter_manage_save" instance="Logicrays\EmailFilter\Observer\Newslatter" />
+    </event>
+</config>

@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <preference for="Magento\Bundle\Block\Catalog\Product\View\Type\Bundle" type="Cellularisrael\BundleProduct\Block\Catalog\Product\View\Type\Bundle"/>
+
+    <type name="Magento\Bundle\Block\Catalog\Product\View\Type\Bundle\Option">
+        <plugin name="bundle-product-option" type="Cellularisrael\BundleProduct\Plugin\OptionPlugin" />
+    </type>
+
+    <!-- <preference for="Magento\Bundle\Block\Catalog\Product\View\Type\Bundle\Option" type="Cellularisrael\BundleProduct\Block\Catalog\Product\View\Type\Bundle\Option" /> -->
+
+    <preference for="Magento\Bundle\Helper\Catalog\Product\Configuration" type="Cellularisrael\BundleProduct\Helper\Catalog\Product\Configuration"/>
+    <type name="Magento\Quote\Model\Quote\Item\ToOrderItem">
+        <plugin name="date_quote_to_order_item" type="Cellularisrael\BundleProduct\Model\Plugin\Quote\QuoteToOrderItem"/>
+    </type>
+
+    <!-- <type name="Magento\Catalog\Block\Product\ProductList\Toolbar">
+        <plugin name="custom_custom_block_toolbar" type="Cellularisrael\BundleProduct\Plugin\Catalog\Block\Toolbar" />
+    </type> -->
+
+    <type name="Magento\Catalog\Model\Config">
+        <plugin name="custom_catalog_model_config" type="Cellularisrael\BundleProduct\Plugin\Catalog\Model\Config" />
+    </type>
+
+    <!-- resolve bug https://github.com/magento/magento2/pull/25875 -->
+    <!-- <preference for="Magento\Catalog\Model\Product\Copier" type="Cellularisrael\BundleProduct\Model\Product\Copier" /> -->
+</config>

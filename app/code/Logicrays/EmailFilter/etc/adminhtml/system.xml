@@ -1,0 +1,68 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Logicrays
+ *
+ * DISCLAIMER
+ *
+ * Do not edit or add to this file if you wish to upgrade this extension to newer
+ * version in the future.
+ *
+ * @category    Logicrays
+ * @package     Logicrays_EmailFilter
+ * @copyright   Copyright (c) Logicrays (https://www.logicrays.com/)
+ */ 
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <section id="emailfilter" translate="label" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="1">
+            <class>separator-top</class>
+            <label>Email Filter</label>
+            <tab>logicrays</tab>
+            <resource>Logicrays_EmailFilter::emailfilter_config</resource>
+            <group id="general" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>General</label>
+                <field id="enable" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Module Enable</label>
+                    <source_model>Magento\Config\Model\Config\Source\Enabledisable</source_model>
+                </field> 
+                <field id="emaildomainrestrict" translate="label" type="textarea" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Email Domain Restriction</label>
+                    <validate>required-entry</validate>
+                    <comment>Put restriction expression inline</comment>
+                    <depends>
+                        <field id="enable">1</field>
+                    </depends>
+                </field>
+                <field id="registrationrestrict" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Registration Email Restriction Enable</label>
+                    <source_model>Magento\Config\Model\Config\Source\Enabledisable</source_model>
+                     <depends>
+                        <field id="enable">1</field>
+                    </depends>
+                </field>
+                <field id="checkoutrestrict" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Checkout Email Restriction Enable</label>
+                    <source_model>Magento\Config\Model\Config\Source\Enabledisable</source_model>
+                     <depends>
+                        <field id="enable">1</field>
+                    </depends>
+                </field> 
+                <field id="contactrestrict" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Contact Us Email Restriction Enable</label>
+                    <source_model>Magento\Config\Model\Config\Source\Enabledisable</source_model>
+                     <depends>
+                        <field id="enable">1</field>
+                    </depends>
+                </field> 
+                <field id="newslatterrestrict" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Newslatter Email Restriction Enable</label>
+                    <source_model>Magento\Config\Model\Config\Source\Enabledisable</source_model>
+                     <depends>
+                        <field id="enable">1</field>
+                    </depends>
+                </field>  
+            </group>
+        </section>
+    </system>
+</config>

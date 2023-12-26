@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>
+        <add id="LR_Supplier::supplier" title="Supplier" translate="title" module="LR_Supplier" sortOrder="1" resource="LR_Supplier::supplier" />
+
+        <add id="LR_Supplier::grid" title="Supplier Grid" translate="title" module="LR_Supplier" sortOrder="1" parent="LR_Supplier::supplier" action="supplier/grid/index" resource="LR_Supplier::grid"/>
+
+        <add id="LR_Supplier::form" title="Supplier Form" translate="title" module="LR_Supplier" sortOrder="1" parent="LR_Supplier::supplier" action="supplier/form/index" resource="LR_Supplier::form"/>
+
+        <add id="LR_Supplier::import" title="Supplier Import" translate="title" module="LR_Supplier" sortOrder="1" parent="LR_Supplier::supplier" action="supplier/import/index" resource="LR_Supplier::import"/>
+    </menu>
+</config>

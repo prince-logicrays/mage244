@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Logicrays
+ *
+ * DISCLAIMER
+ *
+ * Do not edit or add to this file if you wish to upgrade this extension to newer
+ * version in the future.
+ *
+ * @category    Logicrays
+ * @package     Logicrays_ManageCategoryImage
+ * @copyright   Copyright (c) Logicrays (https://www.logicrays.com/)
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>
+        <add id="Logicrays_ManageCategoryImage::managecategoryimage"
+            title="Manage Category Image"
+            module="Logicrays_ManageCategoryImage"
+            sortOrder="10"
+            resource="Logicrays_ManageCategoryImage::managecategoryimage"
+            parent="Logicrays_Base::base"/>
+        <add
+            id="Logicrays_ManageCategoryImage::managecategoryimagegrid"
+            title="Manage Category Image"
+            module="Logicrays_ManageCategoryImage"
+            sortOrder="10"
+            resource="Logicrays_ManageCategoryImage::managecategoryimage"
+            parent="Logicrays_ManageCategoryImage::managecategoryimage"
+            action="managecategoryimage/managecategoryimage"/>
+
+    </menu>
+</config>

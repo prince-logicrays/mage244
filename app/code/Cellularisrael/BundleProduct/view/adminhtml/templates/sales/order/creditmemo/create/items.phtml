@@ -1,0 +1,373 @@
+<?php
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+
+/* @var \Magento\Sales\Block\Adminhtml\Order\Creditmemo\Create\Items $block */
+?>
+<?php $_items = $block->getCreditmemo()->getAllItems() ?>
+<section class="admin__page-section">
+    <div class="admin__page-section-title">
+        <span class="title"><?= $block->escapeHtml(__('Items to Refund')) ?></span>
+    </div>
+
+    <?php if (count($_items)) : ?>
+    <div class="admin__table-wrapper">
+        <table class="data-table admin__table-primary order-creditmemo-tables order-invoice-tables">
+            <thead>
+                <tr class="headings">
+                        <th class="col-product"><span><?= $block->escapeHtml(__('')) ?></span></th>
+                        <th class="col-price"><span><?= $block->escapeHtml(__('One time Charges')) ?></span></th>
+                        <th class="col-qty"><span><?= $block->escapeHtml(__('Charged Monthly')) ?></span></th>
+                </tr>
+            </thead>
+            <?php if ($block->canEditQty()) : ?>
+            <tfoot>
+                <tr>
+                    <td colspan="4">&nbsp;</td>
+                    <td>
+                        <?= $block->getUpdateButtonHtml() ?>
+                    </td>
+                    <td colspan="4" class="last">&nbsp;</td>
+                </tr>
+            </tfoot>
+            <?php endif; ?>
+            <?php $_items = $block->getCreditmemo()->getAllItems() ?>
+                <?php $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+                      $orderItemInterface = $objectManager->create('\Magento\Sales\Api\OrderItemRepositoryInterface');              
+                      $imageHelper  = $objectManager->get('\Magento\Catalog\Helper\Image');
+                      $helper = $this->helper(Magento\Msrp\Helper\Data::class);
+                      $advanceBundleHelper = $this->helper('Cellularisrael\BundleProduct\Helper\Data');       
+                 ?>
+                <?php $i = 0; foreach ($_items as $_item) : ?>
+                        <?php $i++; ?>
+                        <?php /*if ($_item->getOrderItem()->getParentItem()) :
+                            continue;
+                        else :
+                            $i++;
+                        endif;*/ ?>                        
+
+                        <tbody class="<?= /* @noEscape */ $i%2 ? 'even' : 'odd' ?>">
+                            <?php
+                            $product = $objectManager->create('Magento\Catalog\Model\Product')->load($_item->getProductId());                   
+                            $orderItemData = $orderItemInterface->get($_item->getOrderItemId()); 
+                            if ($_item->getOrderItem()->getParentItem()){
+                                $bundleProduct = $objectManager->create('Magento\Catalog\Model\Product')->load($_item->getOrderItem()->getParentItem()->getProductId());    
+                            }                
+                            if($orderItemData->getProductType() == "bundle"){
+                                continue;
+                            }
+
+                            $provider = "By Cellular Israel";
+                            if($orderItemData->getMerchant() ==  2){
+                                $provider = "By Provider";
+                            }
+
+                            $currencyString = "USD";    
+                            if($orderItemData->getStoreId() == 3 || $orderItemData->getStoreId() == 4){
+                                $currencyString = "ILS";
+                            }
+                            
+                            if($orderItemData->getIsPlan()){ ?>
+                                <tr class="planned-product">
+                                    <td class="col item">
+                                        <div class="product-item-image">                    
+                                            <a href="<?= $block->escapeUrl($bundleProduct->getProductUrl()) ?>"
+                                                   title="<?= $block->escapeHtml($orderItemData->getProductName()) ?>"
+                                                   tabindex="-1"
+                                                   class="product-item-photo">                    
+                                                <?php                        
+                                                $image_url = $imageHelper->getDefaultPlaceholderUrl('small_image');
+                                                if($bundleProduct && $bundleProduct->getSmallImage()){
+                                                    $image_url = $imageHelper->init($bundleProduct, 'small_image')->setImageFile($bundleProduct->getSmallImage())->resize(200,200)->getUrl();    
+                                                }
+                                                ?>
+                                                <span class="product-image-container">
+                                                    <span class="product-image-wrapper">
+                                                        <img class="product-image-photo" src="<?= $image_url ?>" />        
+                                                    </span>
+                                                </span>
+                                            </a>                    
+                                        </div>
+                                        <div class="product-item-details">
+                                            <div class="product-important-detail">              
+                                                <strong class="product-item-name">                            
+                                                    <?= $block->escapeHtml($_item->getName()) ?>
+                                                </strong> 
+                                                <div class="product-selected-time">
+                                                    <div class="active-time">
+                                                        <span class="label"><?= __('Start date'); ?></span>
+                                                        <span class="content"><?= $advanceBundleHelper->getFormatedDate($orderItemData->getStartDate()); ?></span>
+                                                    </div>
+                                                    <div class="active-time">
+                                                        <span class="label"><?= __('End date'); ?></span>
+                                                        <span class="content"><?= $advanceBundleHelper->getFormatedDate($orderItemData->getEndDate()); ?></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="cart-input-sec">                       
+                                                    <div class="field qty">
+                                                        <label><span class="label"><?= $block->escapeHtml(__('Quantity')) ?></span></label>
+                                                        <label><span class="label"><?= $_item->getQty() * 1;  ?></span></label>
+                                                    </div>
+                                                </div>
+                                        </div>       
+                                    </td> 
+                                    
+                                    <?php if($orderItemData->getIsSubscription()): ?>
+                                        <td class="col price onetime">
+                                            &nbsp;
+                                        </td>
+
+                                        <td class="col price monthly">
+                                            <?php if (strpos($provider, 'Provider') !== false && $orderItemData->getIsraelPrice()) { ?>
+                                                <span class="currency-symbol"><?= $advanceBundleHelper->getCurrencySymbol('ILS'); ?></span><?= number_format(($orderItemData->getIsraelPrice() * $_item->getQty()),2); ?>
+                                                <span class="merchant"><?= __($provider) ?></span>
+                                            <?php }else{ ?>
+                                                <span class="currency-symbol"><?= $advanceBundleHelper->getCurrencySymbol($currencyString); ?></span><?= number_format(($orderItemData->getPrice() * $_item->getQty()),2); ?>   
+                                                <span class="merchant"><?= __($provider) ?></span>
+                                                <?php } ?>
+                                            
+                                        </td>
+
+                                    <?php else: ?>
+                                        <td class="col price onetime">
+                                            <?php if (strpos($provider, 'Provider') !== false && $orderItemData->getIsraelPrice()) { ?>
+                                                <span class="currency-symbol"><?= $advanceBundleHelper->getCurrencySymbol('ILS'); ?></span><?= number_format(($orderItemData->getIsraelPrice() * $_item->getQty()),2); ?>
+                                                <span class="merchant"><?= __($provider) ?></span>
+                                            <?php }else{ ?>
+                                                <span class="currency-symbol"><?= $advanceBundleHelper->getCurrencySymbol($currencyString); ?></span><?= number_format(($orderItemData->getPrice() * $_item->getQty()),2); ?>   
+                                                <span class="merchant"><?= __($provider) ?></span>
+                                                <?php } ?>
+                                        </td>
+                                        <td class="col price monthly">
+                                            &nbsp;
+                                        </td>
+                                    <?php endif; ?>
+                                </tr>
+
+                            <?php }else{ ?>
+                                <tr id="order-item-row-<?php /* @escapeNotVerified */ echo $_item->getId() ?>" class="<?php if ($_item->getParentItem()): ?>item-options-container<?php else: ?>item-options-container<?php endif; ?>">
+                                    <td class="col item">
+                                        <div class="product-item-image">            
+                                        <span class="product-item-photo">            
+                                            <?php
+                                            $image_url = $imageHelper->getDefaultPlaceholderUrl('small_image');
+                                            if($product && $product->getSmallImage()){
+                                                $image_url = $imageHelper->init($product, 'small_image')->setImageFile($product->getSmallImage())->resize(200,200)->getUrl();    
+                                            }                                         
+                                            ?>
+                                            <span class="product-image-container">
+                                                <span class="product-image-wrapper">
+                                                    <img class="product-image-photo" src="<?= $image_url ?>" />        
+                                                </span>
+                                            </span>            
+                                        </span>            
+                                        </div>
+                                        <div class="product-item-details">
+                                            <div class="product-important-detail">              
+                                                <strong class="product-item-name">                   
+                                                    <?= $block->escapeHtml($_item->getName()) ?>                    
+                                                </strong>                 
+                                            </div>            
+                                        </div>
+                                    </td> 
+                                    
+                                    <?php if($orderItemData->getIsSubscription()): ?>
+                                        <td class="col price onetime">
+                                            &nbsp;
+                                        </td>
+
+                                        <td class="col price monthly">
+                                            <?php if (strpos($provider, 'Provider') !== false && $orderItemData->getIsraelPrice()) { ?>
+                                                <span class="currency-symbol"><?= $advanceBundleHelper->getCurrencySymbol('ILS'); ?></span><?= number_format(($orderItemData->getIsraelPrice() * $_item->getQty()),2); ?>
+                                                <span class="merchant"><?= __($provider) ?></span>
+                                            <?php }else{ ?>
+                                                <span class="currency-symbol"><?= $advanceBundleHelper->getCurrencySymbol($currencyString); ?></span><?= number_format(($orderItemData->getPrice() * $_item->getQty()),2); ?>   
+                                                <span class="merchant"><?= __($provider) ?></span>
+                                                <?php } ?>
+                                        </td>
+
+                                    <?php else: ?>
+                                        <td class="col price onetime">
+                                            <?php if (strpos($provider, 'Provider') !== false && $orderItemData->getIsraelPrice()) { ?>
+                                                <span class="currency-symbol"><?= $advanceBundleHelper->getCurrencySymbol('ILS'); ?></span><?= number_format(($orderItemData->getIsraelPrice() * $_item->getQty()),2); ?>
+                                                <span class="merchant"><?= __($provider) ?></span>
+                                            <?php }else{ ?>
+                                                <span class="currency-symbol"><?= $advanceBundleHelper->getCurrencySymbol($currencyString); ?></span><?= number_format(($orderItemData->getPrice() * $_item->getQty()),2); ?>   
+                                                <span class="merchant"><?= __($provider) ?></span>
+                                                <?php } ?>                
+                                        </td>
+                                        <td class="col price monthly">
+                                            &nbsp;
+                                        </td>
+                                    <?php endif; ?>
+                                </tr>
+                            <?php } ?>
+
+
+                            <?php //$block->getItemHtml($_item) ?>
+                            <?php //$block->getItemExtraInfoHtml($_item->getOrderItem()) ?>
+                        </tbody>
+                <?php endforeach; ?>
+        </table>
+    </div>
+    <?php else : ?>
+    <div class="no-items">
+        <?= $block->escapeHtml(__('No Items To Refund')) ?>
+    </div>
+    <?php endif; ?>
+</section>
+
+<?php $orderTotalBar = $block->getChildHtml('order_totalbar'); ?>
+
+<?php if (!empty($orderTotalBar)) : ?>
+<section class="fieldset-wrapper">
+    <?= /* @noEscape */ $orderTotalBar ?>
+</section>
+<?php endif; ?>
+
+<section class="admin__page-section">
+    <input type="hidden" name="creditmemo[do_offline]" id="creditmemo_do_offline" value="0" />
+    <div class="admin__page-section-title">
+        <span class="title"><?= $block->escapeHtml(__('Order Total')) ?></span>
+    </div>
+    <div class="admin__page-section-content">
+        <div class="admin__page-section-item order-comments-history">
+            <div class="admin__page-section-item-title">
+                <span class="title"><?= $block->escapeHtml(__('Credit Memo Comments')) ?></span>
+            </div>
+            <div id="history_form" class="admin__fieldset-wrapper-content">
+                <div class="admin__field">
+                    <label class="normal admin__field-label"
+                           for="creditmemo_comment_text">
+                        <span><?= $block->escapeHtml(__('Comment Text')) ?></span></label>
+                    <div class="admin__field-control">
+                        <textarea id="creditmemo_comment_text"
+                                  class="admin__control-textarea"
+                                  name="creditmemo[comment_text]"
+                                  rows="3"
+                                  cols="5"><?= $block->escapeHtml($block->getCreditmemo()->getCommentText()) ?></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="admin__page-section-item order-totals creditmemo-totals">
+            <div class="admin__page-section-item-title">
+                <span class="title"><?= $block->escapeHtml(__('Refund Totals')) ?></span>
+            </div>
+            <?= $block->getChildHtml('creditmemo_totals') ?>
+            <div class="order-totals-actions">
+                <div class="field choice admin__field admin__field-option field-append-comments">
+                    <input id="notify_customer"
+                           class="admin__control-checkbox"
+                           name="creditmemo[comment_customer_notify]"
+                           value="1"
+                           type="checkbox" />
+                    <label for="notify_customer" class="admin__field-label">
+                        <span><?= $block->escapeHtml(__('Append Comments')) ?></span>
+                    </label>
+                </div>
+                <?php if ($block->canSendCreditmemoEmail()) :?>
+                <div class="field choice admin__field admin__field-option field-email-copy">
+                    <input id="send_email"
+                           class="admin__control-checkbox"
+                           name="creditmemo[send_email]"
+                           value="1"
+                           type="checkbox" />
+                    <label for="send_email" class="admin__field-label">
+                        <span><?= $block->escapeHtml(__('Email Copy of Credit Memo')) ?></span>
+                    </label>
+                </div>
+                <?php endif; ?>
+                <?= $block->getChildHtml('submit_before') ?>
+                <div class="actions">
+                    <?= $block->getChildHtml('submit_offline') ?>
+                    <?= $block->getChildHtml('submit_button') ?>
+                    <?= $block->getChildHtml('submit_after') ?>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+require(['jquery'], function(jQuery){
+
+//<![CDATA[
+var submitButtons = jQuery('.submit-button');
+var updateButtons = jQuery('.update-button');
+var fields = jQuery('.qty-input');
+function enableButtons(buttons) {
+    buttons.removeClass('disabled').prop('disabled', false);
+}
+
+function disableButtons(buttons) {
+    buttons.addClass('disabled').prop('disabled', true);
+}
+
+disableButtons(updateButtons);
+
+fields.on('change', checkButtonsRelation);
+fields.each(function (i, elem) {
+    elem.baseValue = elem.value;
+});
+
+function checkButtonsRelation() {
+    var hasChanges = false;
+    fields.each(function (i, elem) {
+        if (elem.baseValue != elem.value) {
+            hasChanges = true;
+        }
+    }.bind(this));
+    if (hasChanges) {
+        disableButtons(submitButtons);
+        enableButtons(updateButtons);
+    }
+    else {
+        enableButtons(submitButtons);
+        disableButtons(updateButtons);
+    }
+}
+
+submitCreditMemo = function() {
+    var creditMemoOffline = jQuery('#creditmemo_do_offline');
+    if (creditMemoOffline.length) {
+        creditMemoOffline.prop('value', 0);
+    }
+    // Temporary solution will be replaced after refactoring order functionality
+    jQuery('#edit_form').triggerHandler('save');
+};
+
+submitCreditMemoOffline = function() {
+    var creditMemoOffline = jQuery('#creditmemo_do_offline');
+    if (creditMemoOffline.length) {
+        creditMemoOffline.prop('value', 1);
+    }
+    // Temporary solution will be replaced after refactoring order functionality
+    jQuery('#edit_form').triggerHandler('save');
+};
+
+var sendEmailCheckbox = jQuery('#send_email');
+if (sendEmailCheckbox.length) {
+    var notifyCustomerCheckbox = jQuery('#notify_customer');
+    sendEmailCheckbox.on('change', bindSendEmail);
+    bindSendEmail();
+}
+
+function bindSendEmail() {
+    if (sendEmailCheckbox.prop('checked') == true) {
+        notifyCustomerCheckbox.prop('disabled', false);
+    }
+    else {
+        notifyCustomerCheckbox.prop('disabled', true);
+    }
+}
+
+window.bindSendEmail = bindSendEmail;
+window.checkButtonsRelation = checkButtonsRelation;
+//]]>
+
+});
+</script>

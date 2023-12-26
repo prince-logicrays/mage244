@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<!-- /**
+ * Logicrays
+ *
+ * DISCLAIMER
+ *
+ * Do not edit or add to this file if you wish to upgrade this extension to newer
+ * version in the future.
+ *
+ * @category    Logicrays
+ * @package     Logicrays_ManageCategoryImage
+ * @copyright   Copyright (c) Logicrays (https://www.logicrays.com/)
+ */ -->
+
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="logicrays_manage_category_image" resource="default" comment="Logicrays Manage Category Image" charset="utf8">
+        <column name="id" xsi:type="int" padding="5" unsigned="true" identity="true" nullable="false"></column>
+        <column name="category_id" xsi:type="varchar" nullable="false" length="10"></column>
+        <column name="attributes" xsi:type="varchar" nullable="false" length="255"></column>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="id"/>
+        </constraint>
+        <index referenceId="INDEX_NAME" indexType="btree">
+            <column name="category_id"/>
+        </index>
+    </table>
+    <table name="logicrays_category_attribute_option_image" resource="default" comment="Logicrays Category Attribute Option Image" charset="utf8">
+        <column name="id" xsi:type="int" padding="5" unsigned="true" identity="true" nullable="false"></column>
+        <column name="category_id" xsi:type="varchar" nullable="false" length="10"></column>
+        <column name="attribute_options" xsi:type="varchar" nullable="false" length="250"></column>
+        <column name="image" xsi:type="varchar" nullable="false" length="100"></column>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="id"/>
+        </constraint>
+        <!-- <constraint xsi:type="foreign" referenceId="FK_lr_manage_category_image_lr_category_attribute_option_image" table="logicrays_category_attribute_option_image" column="category_id" referenceTable="logicrays_manage_category_image" referenceColumn="category_id" onDelete="CASCADE" /> -->
+    </table>
+</schema>

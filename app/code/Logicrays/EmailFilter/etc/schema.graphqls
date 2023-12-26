@@ -1,0 +1,8 @@
+type StoreConfig {
+    email_filter_enable : String @doc(description: "To fetch value of module enable or disable"),
+    email_filter_registrationrestrict : String @doc(description: "filter on registration page"),
+    email_filter_checkoutrestrict : String @doc(description: "filter on checkout page"),
+    email_filter_contactrestrict : String @doc(description: "filter on contact page"),
+    email_filter_newslatterrestrict : String @doc(description: "filter on newslatter page"),
+    email_filter_emaildomainrestrict : String @doc(description: "get value of email domain restrict")
+}

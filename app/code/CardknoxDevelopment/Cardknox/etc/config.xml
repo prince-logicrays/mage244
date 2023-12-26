@@ -1,0 +1,103 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © 2018 Cardknox Development Inc. All rights reserved.
+ * See LICENSE for license details.
+ */
+-->
+
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <payment>
+            <cardknox>
+                <debug>1</debug>
+                <active>0</active>
+                <model>CardknoxFacade</model>
+                <cardknox_transaction_key backend_model="Magento\Config\Model\Config\Backend\Encrypted" />
+                <cardknox_token_key backend_model="Magento\Config\Model\Config\Backend\Encrypted"/>
+                <order_status>pending_payment</order_status>
+                <payment_action>authorize</payment_action>
+                <cardknox_cc_split_capture_enabled>0</cardknox_cc_split_capture_enabled>
+                <title>Credit Card</title>
+                <currency>USD</currency>
+                <can_authorize>1</can_authorize>
+                <can_capture>1</can_capture>
+                <can_capture_partial>1</can_capture_partial>
+                <can_void>1</can_void>
+                <can_refund>1</can_refund>
+                <can_refund_partial_per_invoice>1</can_refund_partial_per_invoice>
+                <can_cancel>1</can_cancel>
+                <can_cancel_invoice>1</can_cancel_invoice>
+                <can_use_internal>1</can_use_internal>
+                <can_use_checkout>1</can_use_checkout>
+                <can_authorize_vault>1</can_authorize_vault>
+                <can_capture_vault>1</can_capture_vault>
+                <is_gateway>1</is_gateway>
+                <cgi_url>https://x1.cardknox.com/gateway</cgi_url>
+                <usecvv>1</usecvv>
+                <cctypes_cardknox_mapper><![CDATA[{"Amex":"AE","Visa":"VI","MasterCard":"MC","Discover":"DI","JCB":"JCB","CUP":"CUP","Diners":"DN","MI":"MI"}]]></cctypes_cardknox_mapper>
+                <privateInfoKeys>xAvsResult,xAvsResultCode,xCvvResult,xCvvResultCode,xRefNum,xAuthCode,xBatch,xExp</privateInfoKeys>
+                <paymentInfoKeys>xCardType,xMaskedCardNumber,xAuthAmount,xAuthCode,xBatch,xAvsResult,xAvsResultCode,xCvvResult,xCvvResultCode,xExp,xRefNum</paymentInfoKeys>
+                <debugReplaceKeys>xKey,xCardNum,xCvv</debugReplaceKeys>
+                <recaptchaEnabled></recaptchaEnabled>
+                <visible_api_key></visible_api_key>
+                <visible_api_secret></visible_api_secret>
+                <select_recaptcha_source>google.com</select_recaptcha_source>
+                <allowspecific>0</allowspecific>
+            </cardknox>
+            <cardknox_cc_vault>
+                <model>CardknoxCreditCardVaultFacade</model>
+                <title>Stored Cards</title>
+                <can_use_internal>1</can_use_internal>
+            </cardknox_cc_vault>
+            <cardknox_google_pay>
+                <model>CardknoxGooglePayFacade</model>
+                <merchant_name></merchant_name>
+                <cardknox_gpay_active>1</cardknox_gpay_active>
+                <title>Google Pay</title>
+                <payment_action>authorize</payment_action>
+                <cardknox_gpay_split_capture_enabled>0</cardknox_gpay_split_capture_enabled>
+                <currency>USD</currency>
+                <sort_order>3</sort_order>
+                <is_gateway>1</is_gateway>
+                <can_use_checkout>1</can_use_checkout>
+                <can_authorize>1</can_authorize>
+                <can_capture>1</can_capture>
+                <can_capture_partial>1</can_capture_partial>
+                <can_cancel>1</can_cancel>
+                <can_refund>1</can_refund>
+                <can_refund_partial_per_invoice>1</can_refund_partial_per_invoice>
+                <can_void>1</can_void>
+                <can_use_internal>0</can_use_internal>
+                <can_refund_partial_per_invoice>1</can_refund_partial_per_invoice>
+                <merchant_id></merchant_id>
+                <environment>TEST</environment>
+                <button_style>white</button_style>
+                <allowspecific>0</allowspecific>
+            </cardknox_google_pay>
+            <cardknox_apple_pay>
+                <model>CardknoxApplePayFacade</model>
+                <cardknox_applepay_active>0</cardknox_applepay_active>
+                <merchant_identifier>merchant.cardknox.com</merchant_identifier>
+                <title>Apple Pay</title>
+                <environment>TEST</environment>
+                <ap_button_style>black</ap_button_style>
+                <ap_button_type>pay</ap_button_type>
+                <payment_action>authorize</payment_action>
+                <allowspecific>0</allowspecific>
+                <is_gateway>1</is_gateway>
+                <currency>USD</currency>
+                <can_use_checkout>1</can_use_checkout>
+                <can_authorize>1</can_authorize>
+                <can_capture>1</can_capture>
+                <can_capture_partial>1</can_capture_partial>
+                <can_cancel>1</can_cancel>
+                <can_refund>1</can_refund>
+                <can_refund_partial_per_invoice>1</can_refund_partial_per_invoice>
+                <can_void>1</can_void>
+                <can_use_internal>0</can_use_internal>
+                <can_refund_partial_per_invoice>1</can_refund_partial_per_invoice>
+            </cardknox_apple_pay>
+        </payment>
+    </default>
+</config>

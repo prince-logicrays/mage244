@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="lr_supplier_data" resource="default" engine="innodb" comment="lr_supplier">
+        <column xsi:type="int" name="entity_id" unsigned="true" nullable="true" identity="true" />
+        <column xsi:type="varchar" name="sku" length="200" nullable="true" />
+        <column xsi:type="varchar" name="product_name" length="255" nullable="true" />
+        <column xsi:type="varchar" name="supplier" length="255" nullable="true" />
+        <column xsi:type="text" name="description" nullable="true"/>
+        <column xsi:type="varchar" name="category_main" length="255" nullable="true"/>
+        <column xsi:type="varchar" name="category_sub" length="255" nullable="true"/>
+        <column xsi:type="text" name="pricing" nullable="true"/>
+        <column xsi:type="text" name="printing" nullable="true"/>
+        <column xsi:type="text" name="colours" nullable="true" />
+        <column xsi:type="text" name="images" nullable="true" />
+        <column xsi:type="text" name="specification" nullable="true" />
+        <column xsi:type="text" name="packaging" nullable="true"/>
+        <column xsi:type="text" name="image360" nullable="true"/>
+        <column xsi:type="text" name="certification" nullable="true"/>
+        <column xsi:type="text" name="delivery_time" nullable="true"/>
+        <column xsi:type="text" name="origin" nullable="true"/>
+        <column xsi:type="text" name="keywords" nullable="true"/>
+        <column xsi:type="tinyint" name="status" nullable="false" default="0"/>
+        <column xsi:type="smallint" name="supplier_id" nullable="true"/>
+        <column xsi:type="datetime" name="created_at" nullable="true" default="CURRENT_TIMESTAMP" on_update="false"/>
+        <column xsi:type="datetime" name="updated_at" nullable="true" default="CURRENT_TIMESTAMP" on_update="true"/>
+
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="entity_id"/>
+        </constraint>
+        <constraint xsi:type="unique" referenceId="SKU">
+            <column name="sku"/>
+        </constraint>
+    </table>
+    <table name="lr_supplier" resource="default" engine="innodb" comment="lr_supplier">
+        <column xsi:type="int" name="entity_id" unsigned="true" nullable="true" identity="true" />
+        <column xsi:type="varchar" name="name" length="200" nullable="true" />
+
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="entity_id"/>
+        </constraint>
+        <constraint xsi:type="unique" referenceId="NAME">
+            <column name="name"/>
+        </constraint>
+    </table>
+</schema>

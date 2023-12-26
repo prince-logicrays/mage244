@@ -1,0 +1,26 @@
+{
+    "logicrays_manage_category_image": {
+        "column": {
+            "id": true,
+            "category_id": true,
+            "attributes": true
+        },
+        "index": {
+            "LOGICRAYS_MANAGE_CATEGORY_IMAGE_CATEGORY_ID": true
+        },
+        "constraint": {
+            "PRIMARY": true
+        }
+    },
+    "logicrays_category_attribute_option_image": {
+        "column": {
+            "id": true,
+            "category_id": true,
+            "attribute_options": true,
+            "image": true
+        },
+        "constraint": {
+            "PRIMARY": true
+        }
+    }
+}

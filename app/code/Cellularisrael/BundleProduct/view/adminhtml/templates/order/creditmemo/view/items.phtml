@@ -1,0 +1,244 @@
+<?php
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+
+/* @var \Magento\Sales\Block\Adminhtml\Order\Creditmemo\View\Items $block */
+?>
+<div class="admin__page-section">
+    <div class="admin__page-section-title">
+        <span class="title"><?= $block->escapeHtml(__('Items Refunded')) ?></span>
+    </div>
+    <div class="admin__page-section-content">
+        <div class="admin__table-wrapper">
+            <table class="data-table admin__table-primary order-creditmemo-tables order-invoice-tables">
+                <thead>
+                   <tr class="headings">
+                        <th class="col-product"><span><?= $block->escapeHtml(__('')) ?></span></th>
+                        <th class="col-price"><span><?= $block->escapeHtml(__('One time Charges')) ?></span></th>
+                        <th class="col-qty"><span><?= $block->escapeHtml(__('Charged Monthly')) ?></span></th>
+                    </tr>
+                </thead>
+                <?php $_items = $block->getCreditmemo()->getAllItems() ?>
+                <?php $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+                      $orderItemInterface = $objectManager->create('\Magento\Sales\Api\OrderItemRepositoryInterface');
+                      $imageHelper  = $objectManager->get('\Magento\Catalog\Helper\Image');
+                      $helper = $this->helper(Magento\Msrp\Helper\Data::class);
+                      $advanceBundleHelper = $this->helper('Cellularisrael\BundleProduct\Helper\Data');
+                      $order = $block->getOrder();
+                      $storeId = $order->getStoreId();
+
+                      $taxConfig = $objectManager->create('Magento\Tax\Model\Config');
+                      $displaySalesPricesInclTax = $taxConfig->priceIncludesTax($storeId);
+                 ?>
+                <?php $i = 0; foreach ($_items as $_item) : ?>
+                        <?php $i++; ?>
+                        <?php /*if ($_item->getOrderItem()->getParentItem()) :
+                            continue;
+                        else :
+                            $i++;
+                        endif;*/ ?>
+                        <tbody class="<?= /* @noEscape */ $i%2 ? 'even' : 'odd' ?>">
+                            <?php
+                            $product = $objectManager->create('Magento\Catalog\Model\Product')->load($_item->getProductId());
+                            $orderItemData = $orderItemInterface->get($_item->getOrderItemId());
+                            if ($_item->getOrderItem()->getParentItem()){
+                                $bundleProduct = $objectManager->create('Magento\Catalog\Model\Product')->load($_item->getOrderItem()->getParentItem()->getProductId());
+                                $attributeSet = $objectManager->get('Magento\Eav\Api\AttributeSetRepositoryInterface');
+                                $attribute = $attributeSet->get($bundleProduct->getAttributeSetId());
+                                $productattributeset = $attribute->getAttributeSetName();
+                            }
+                            if($orderItemData->getProductType() == "bundle"){
+                                continue;
+                            }
+
+                            $provider = "By Cellular Israel";
+                            if($orderItemData->getMerchant() == 2){
+                                $provider = "By Provider";
+                            }
+
+                            $currencyString = "USD";
+                            if($orderItemData->getStoreId() == 3 || $orderItemData->getStoreId() == 4){
+                                $currencyString = "ILS";
+                            }
+
+                            if($orderItemData->getIsPlan()){ ?>
+                                <tr class="planned-product">
+                                    <td class="col item">
+                                        <div class="product-item-image">
+                                            <a href="<?= $block->escapeUrl($bundleProduct->getProductUrl()) ?>"
+                                                   title="<?= $block->escapeHtml($orderItemData->getProductName()) ?>"
+                                                   tabindex="-1"
+                                                   class="product-item-photo">
+                                                <?php
+                                                $image_url = $imageHelper->getDefaultPlaceholderUrl('small_image');
+                                                if($bundleProduct && $bundleProduct->getSmallImage()){
+                                                    $image_url = $imageHelper->init($bundleProduct, 'small_image')->setImageFile($bundleProduct->getSmallImage())->resize(200,200)->getUrl();
+
+                                                }
+                                                ?>
+                                                <span class="product-image-container">
+                                                    <span class="product-image-wrapper">
+                                                        <img class="product-image-photo" src="<?= $image_url ?>" />
+                                                    </span>
+                                                </span>
+                                            </a>
+                                        </div>
+                                        <div class="product-item-details">
+                                            <div class="product-important-detail">
+                                                <strong class="product-item-name">
+                                                <?php if($productattributeset == 'Day-Plan'): ?>
+                                                    <?= $block->escapeHtml($bundleProduct->getName()) ?>
+                                                <?php else: ?>
+                                                    <?= $block->escapeHtml($_item->getName()) ?>
+                                                <?php endif; ?>
+                                                </strong>
+                                                <div class="product-selected-time">
+                                                    <div class="active-time">
+                                                        <span class="label"><?= __('Start date'); ?></span>
+                                                        <span class="content"><?= $advanceBundleHelper->getFormatedDate($orderItemData->getStartDate()); ?></span>
+                                                    </div>
+                                                    <div class="active-time">
+                                                        <span class="label"><?= __('End date'); ?></span>
+                                                        <span class="content"><?= $advanceBundleHelper->getFormatedDate($orderItemData->getEndDate()); ?></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="cart-input-sec">
+                                                    <div class="field qty">
+                                                        <label><span class="label"><?= $block->escapeHtml(__('Quantity')) ?></span></label>
+                                                        <label><span class="label"><?= 1;  ?></span></label>
+                                                    </div>
+                                                </div>
+                                        </div>
+                                    </td>
+
+                                    <?php if($orderItemData->getIsSubscription()): ?>
+                                        <td class="col price onetime">
+                                            &nbsp;
+                                        </td>
+
+                                        <td class="col price monthly">
+                                            <?php if (strpos($provider, 'Provider') !== false  && $orderItemData->getIsraelPrice()) { ?>
+                                                <span class="currency-symbol"><?= $advanceBundleHelper->getCurrencySymbol('ILS'); ?></span><?= number_format(($orderItemData->getIsraelPrice() * $_item->getQty()),2); ?>
+                                                <span class="merchant"><?= __($provider) ?></span>
+                                            <?php }else{ ?>
+                                                <?php
+                                                    if ($displaySalesPricesInclTax== 1) {
+                                                        $_price = $orderItemData->getPriceInclTax();
+                                                    } else {
+                                                        $_price = $orderItemData->getPrice();
+                                                    }
+                                                ?>
+                                                <span class="currency-symbol"><?= $advanceBundleHelper->getCurrencySymbol($currencyString); ?></span><?= number_format(($_price * $_item->getQty()),2); ?>
+                                                <span class="merchant"><?= __($provider) ?></span>
+                                                <?php } ?>
+
+                                        </td>
+
+                                    <?php else: ?>
+                                        <td class="col price onetime">
+                                            <?php if (strpos($provider, 'Provider') !== false && $orderItemData->getIsraelPrice()) { ?>
+                                                <span class="currency-symbol"><?= $advanceBundleHelper->getCurrencySymbol('ILS'); ?></span><?= number_format(($orderItemData->getIsraelPrice() * $_item->getQty()),2); ?>
+                                                <span class="merchant"><?= __($provider) ?></span>
+                                            <?php }else{ ?>
+                                                <?php
+                                                    if ($displaySalesPricesInclTax== 1) {
+                                                        $_price = $orderItemData->getPriceInclTax();
+                                                    } else {
+                                                        $_price = $orderItemData->getPrice();
+                                                    }
+                                                ?>
+                                                <span class="currency-symbol"><?= $advanceBundleHelper->getCurrencySymbol($currencyString); ?></span><?= number_format(($_price * $_item->getQty()),2); ?>
+                                                <span class="merchant"><?= __($provider) ?></span>
+                                                <?php } ?>
+                                        </td>
+                                        <td class="col price monthly">
+                                            &nbsp;
+                                        </td>
+                                    <?php endif; ?>
+                                </tr>
+
+                            <?php }else{ ?>
+                                <tr id="order-item-row-<?php /* @escapeNotVerified */ echo $_item->getId() ?>" class="<?php if ($_item->getParentItem()): ?>item-options-container<?php else: ?>item-options-container<?php endif; ?>">
+                                    <td class="col item">
+                                        <div class="product-item-image">
+                                        <span class="product-item-photo">
+                                            <?php
+                                            $image_url = $imageHelper->getDefaultPlaceholderUrl('small_image');
+                                            if($product && $product->getSmallImage()){
+                                                $image_url = $imageHelper->init($product, 'small_image')->setImageFile($product->getSmallImage())->resize(200,200)->getUrl();
+                                            }
+                                            ?>
+                                            <span class="product-image-container">
+                                                <span class="product-image-wrapper">
+                                                    <img class="product-image-photo" src="<?= $image_url ?>" />
+                                                </span>
+                                            </span>
+                                        </span>
+                                        </div>
+                                        <div class="product-item-details">
+                                            <div class="product-important-detail">
+                                                <strong class="product-item-name">
+                                                    <?= $block->escapeHtml($_item->getName()) ?>
+                                                </strong>
+                                            </div>
+                                        </div>
+                                    </td>
+
+                                    <?php if($orderItemData->getIsSubscription()): ?>
+                                        <td class="col price onetime">
+                                            &nbsp;
+                                        </td>
+
+                                        <td class="col price monthly">
+                                            <?php if (strpos($provider, 'Provider') !== false) { ?>
+                                                <span class="currency-symbol"><?= $advanceBundleHelper->getCurrencySymbol('ILS'); ?></span><?= number_format(($orderItemData->getIsraelPrice() * $_item->getQty()),2); ?>
+                                                <span class="merchant"><?= __($provider) ?></span>
+                                            <?php }else{ ?>
+                                                <?php
+                                                    if ($displaySalesPricesInclTax== 1) {
+                                                        $_price = $orderItemData->getPriceInclTax();
+                                                    } else {
+                                                        $_price = $orderItemData->getPrice();
+                                                    }
+                                                ?>
+                                                <span class="currency-symbol"><?= $advanceBundleHelper->getCurrencySymbol($currencyString); ?></span><?= number_format(($_price * $_item->getQty()),2); ?>
+                                                <span class="merchant"><?= __($provider) ?></span>
+                                                <?php } ?>
+                                        </td>
+
+                                    <?php else: ?>
+                                        <td class="col price onetime">
+                                            <?php if (strpos($provider, 'Provider') !== false && $orderItemData->getIsraelPrice()) { ?>
+                                                <span class="currency-symbol"><?= $advanceBundleHelper->getCurrencySymbol('ILS'); ?></span><?= number_format(($orderItemData->getIsraelPrice() * $_item->getQty()),2); ?>
+                                                <span class="merchant"><?= __($provider) ?></span>
+                                            <?php }else{ ?>
+                                                <?php
+                                                    if ($displaySalesPricesInclTax== 1) {
+                                                        $_price = $orderItemData->getPriceInclTax();
+                                                    } else {
+                                                        $_price = $orderItemData->getPrice();
+                                                    }
+                                                ?>
+                                                <span class="currency-symbol"><?= $advanceBundleHelper->getCurrencySymbol($currencyString); ?></span><?= number_format(($_price * $_item->getQty()),2); ?>
+                                                <span class="merchant"><?= __($provider) ?></span>
+                                                <?php } ?>
+                                        </td>
+                                        <td class="col price monthly">
+                                            &nbsp;
+                                        </td>
+                                    <?php endif; ?>
+                                </tr>
+                            <?php } ?>
+
+
+                            <?php //$block->getItemHtml($_item) ?>
+                            <?php //$block->getItemExtraInfoHtml($_item->getOrderItem()) ?>
+                        </tbody>
+                <?php endforeach; ?>
+            </table>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Logicrays
+ *
+ * DISCLAIMER
+ *
+ * Do not edit or add to this file if you wish to upgrade this extension to newer
+ * version in the future.
+ *
+ * @category    Logicrays
+ * @package     Logicrays_EmailFilter
+ * @copyright   Copyright (c) Logicrays (https://www.logicrays.com/)
+ */ 
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Acl/etc/acl.xsd">
+    <acl>       
+        <resources>
+            <resource id="Magento_Backend::admin">                               
+                <resource id="Magento_Backend::stores">
+                    <resource id="Magento_Backend::stores_settings">
+                        <resource id="Magento_Config::config">
+                            <resource id="Logicrays_EmailFilter::emailfilter_config" title="EmailFilter" sortOrder="110"/> 
+                        </resource>
+                    </resource>
+                </resource>
+            </resource>
+        </resources>
+    </acl>
+</config>

@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <!-- <virtualType name="Magento\Catalog\Ui\DataProvider\Product\Form\Modifier\Pool">
+        <arguments>
+            <argument name="modifiers" xsi:type="array">
+                <item name="extra_options" xsi:type="array">
+                    <item name="class" xsi:type="string">Cellularisrael\BundleProduct\Ui\DataProvider\Product\Form\Modifier\CustomOptions</item>
+                    <item name="sortOrder" xsi:type="number">10</item>
+                </item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <preference for="Magento\Bundle\Block\Adminhtml\Catalog\Product\Edit\Tab\Bundle\Option" type="Cellularisrael\BundleProduct\Block\Adminhtml\Catalog\Product\Edit\Tab\Bundle\Option" /> -->
+    <type name="Magento\Bundle\Ui\DataProvider\Product\Form\Modifier\BundlePanel">
+        <plugin name="bundle_addtional_options" type="Cellularisrael\BundleProduct\Plugin\Bundle\Ui\DataProvider\Product\Form\Modifier\BundlePanel" sortOrder="1000"/>
+    </type>
+    <preference for="Magento\Bundle\Ui\DataProvider\Product\Form\Modifier\Composite" type="Cellularisrael\BundleProduct\Ui\DataProvider\Product\Form\Modifier\Composite"/>
+    <preference for="Magento\Bundle\Model\Product\OptionList" type="Cellularisrael\BundleProduct\Model\Bundle\Product\OptionList"/>
+    <!-- Bundle Product Option Add Store Description Field Store-Wise Start-->
+    <preference for="Magento\Bundle\Model\ResourceModel\Option" type="Cellularisrael\BundleProduct\Model\ResourceModel\Option" />
+    <preference for="Magento\Bundle\Model\ResourceModel\Option\Collection" type="Cellularisrael\BundleProduct\Model\ResourceModel\Option\Collection" />
+    <preference for="Magento\Bundle\Api\Data\OptionInterface" type="Cellularisrael\BundleProduct\Api\Data\OptionInterface" />
+    <preference for="Magento\Bundle\Model\Option" type="Cellularisrael\BundleProduct\Model\Option" />
+    <preference for="Cellularisrael\BundleProduct\Api\Data\OptionInterface" type="Cellularisrael\BundleProduct\Model\Option" />
+    <preference for="Magento\Bundle\Ui\DataProvider\Product\Form\Modifier\BundlePanel" type="Cellularisrael\BundleProduct\Ui\DataProvider\Product\Form\Modifier\BundlePanel" />
+    <!-- Bundle Product Option Add Store Description Field Store-Wise End-->
+    <!-- Bundle Product Option Popup Message Start-->
+    <type name="Magento\Bundle\Ui\DataProvider\Product\Form\Modifier\BundleCustomOptions">
+        <plugin sortOrder="100" name="Cellularisrael_BundleProduct_Bundle_Modifier_CustomOptions" type="Cellularisrael\BundleProduct\Plugin\Ui\DataProvider\Product\Form\Modifier\BundleCustomOptions"/>
+    </type>
+    <preference for="Magento\Bundle\Model\LinkManagement" type="Cellularisrael\BundleProduct\Model\Magento\Bundle\Model\LinkManagement" />
+    <type name="Magento\Bundle\Ui\DataProvider\Product\Form\Modifier\Composite">
+        <plugin sortOrder="100" name="Cellularisrael_BundleProduct_Modifier_Composite" type="Cellularisrael\BundleProduct\Plugin\Bundle\Ui\DataProvider\Product\Form\Modifier\Composite"/>
+    </type>
+    <!-- Bundle Product Option Popup Message End-->
+</config>

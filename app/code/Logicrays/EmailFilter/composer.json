@@ -1,0 +1,27 @@
+{
+    "name": "logicrays/module-emailfilter",
+    "description": "email filter restriction",
+    "require": {
+        "php": "~7.0.0|~7.1.0|~7.2.0|~7.3.0|~7.4.0|~8.1.0",
+        "logicrays/module-base": "*"
+    },
+    "type": "magento2-module",
+    "version": "1.0.4",
+    "license": [
+        "OSL-3.0",
+        "AFL-3.0"
+    ],
+    "authors": [
+        {
+            "name": "Logicrays",
+            "email": "biz@logicrays.com",
+            "homepage": "https://logicrays.com/"
+        }
+    ],
+    "autoload": {
+        "files": [ "registration.php" ],
+        "psr-4": {
+            "Logicrays\\EmailFilter\\": ""
+        }
+    }
+}

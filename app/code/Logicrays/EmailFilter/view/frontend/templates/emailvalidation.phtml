@@ -1,0 +1,114 @@
+<?php
+/**
+ * Logicrays
+ *
+ * DISCLAIMER
+ *
+ * Do not edit or add to this file if you wish to upgrade this extension to newer
+ * version in the future.
+ *
+ * @category    Logicrays
+ * @package     Logicrays_EmailFilter
+ * @copyright   Copyright (c) Logicrays (https://www.logicrays.com/)
+ */
+
+$helper = $block->getViewModel()->getHelperData();
+$emailRestriction = $helper->getEmailrestrictonsplit();
+$fullPathActionName = $block->getRequest()->getFullActionName();
+$IsCheckEnable = 0;
+
+if ($fullPathActionName == 'contact_index_index') {
+    $IsCheckEnable = $helper->getContactRestriction();
+}
+if ($fullPathActionName == 'customer_account_create') {
+    $IsCheckEnable = $helper->getRegistrationRestriction();
+}
+if ($fullPathActionName == 'checkout_index_index') {
+    $IsCheckEnable = $helper->getCheckoutRestriction();
+}
+?>
+
+<?php if ($helper->isEnabled() && $IsCheckEnable): ?>
+<script>
+require([
+    'jquery',
+    'jquery-ui-modules/widget',
+    'jquery/validate',
+    'mage/translate',
+    'mage/mage'
+], function($){
+    $("input[id='email_address']").addClass("customemail");
+    $("input[id='email_address1']").addClass("customemail");  
+    $("input[id='customer-email']").addClass("customemail");  
+    $.validator.addMethod(
+    'customemail', function (value) {
+        var isValid = true;
+        var complex = <?= /* @noEscape */ $emailRestriction ?>;
+        if(complex && complex.length > 0){
+            $.each(complex, function(i, item){
+                if(value.includes(item)){
+                    isValid = false;
+                }
+            });
+        }
+    return isValid;
+    }, $.mage.__('Sorry, your e-mail address is not available at this store.!'));
+
+    $('.customemail').change(function() {
+        $.validator.validateSingleElement('.customemail');
+    });
+
+     $.validator.addMethod(
+        'valid', function (value) { 
+            var isValid = true;
+            var complex = <?= /* @noEscape */ $emailRestriction ?>; 
+            if(complex && complex.length > 0){
+                $.each(complex, function(i, item){
+                    if(value.includes(item)){
+                        isValid = false;
+                    }
+                });
+            }
+            return isValid;
+        }, $.mage.__('Sorry, your e-mail address is not available at this store.!'));
+
+    $('.valid').change(function() {
+        $.validator.validateSingleElement('.valid');          
+    });
+});
+
+</script>
+<?php endif; ?>
+<?php if ($helper->isEnabled() && $helper->getNewslatterRestriction()): ?>
+<script>
+     require([
+    'jquery',
+    'jquery-ui-modules/widget',
+    'jquery/validate',
+    'mage/translate',
+    'mage/mage'
+], function($){
+    $("#newsletter").addClass("newslatteremail").removeClass(".customemail");
+
+     $.validator.addMethod(
+        'newslatteremail', function (value) { 
+            var isValid = true;
+            var complex = <?= /* @noEscape */ $emailRestriction ?>;
+            if(complex && complex.length > 0){
+                $.each(complex, function(i, item){
+                    if(value.includes(item)){
+                        isValid = false;
+                    }
+                });
+            }
+            return isValid;
+        }, $.mage.__('Sorry, your e-mail address is not available at this store.!'));
+
+    $('.newslatteremail').change(function() {
+        $.validator.validateSingleElement('.newslatteremail');          
+    });
+
+});
+
+</script>
+<?php endif; ?>

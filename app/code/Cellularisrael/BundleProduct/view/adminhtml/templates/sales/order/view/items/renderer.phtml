@@ -1,0 +1,1301 @@
+<?php
+/**
+ * @see \Magento\Bundle\Block\Adminhtml\Sales\Order\View\Items\Renderer
+ */
+/** @var $block \Magento\Bundle\Block\Adminhtml\Sales\Order\View\Items\Renderer */
+/** @var \Magento\Bundle\Block\Adminhtml\Sales\Order\View\Items\Renderer $block */
+?>
+
+
+<?php
+$writer = new \Zend_Log_Writer_Stream(BP . '/var/log/admin_orders.log');
+$adminOrderLogger = new \Zend_Log();
+$adminOrderLogger->addWriter($writer);
+$parentItem = $block->getItem();
+$provision_order_id = $parentItem->getItemId();
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+$bundleProduct = $objectManager->create('Magento\Catalog\Model\Product')->load($parentItem->getProductId());
+$orderobj = $objectManager->create('Magento\Sales\Model\Order');
+$order = $orderobj->load($parentItem->getOrderId());
+
+$items = $parentItem->getChildrenItems();
+$_count = count($items);
+$_index = 0;
+
+$imageHelper = $objectManager->get('\Magento\Catalog\Helper\Image');
+$_prevOptionId = '';
+$helper = $this->helper(Magento\Msrp\Helper\Data::class);
+$advanceBundleHelper = $this->helper('Cellularisrael\BundleProduct\Helper\Data');
+$Orderitemsdetails = $objectManager->create('Cellularisrael\Mobileplans\Model\Orderitemsdetails')->load($provision_order_id, 'sales_order_item_id');
+$linkedPlanOrderNumber = $Orderitemsdetails->getData('linked_virtual_number_plan');
+$oldOrderId = $orderobj->loadByIncrementId($linkedPlanOrderNumber)->getId();
+$urlInterface = $objectManager->get('Magento\Framework\UrlInterface');
+
+$simid = $Orderitemsdetails->getData('sim_id');
+$sim_number_label = '';
+if ($simid) {
+    $simcollection = $objectManager->create('Cellularisrael\Mobileplans\Model\Sims');
+    $simcollectiondata = $simcollection->load($simid);
+    $sim_number_label = $simcollectiondata->getData('iccid');
+}
+$provision_phoneNumber = $Orderitemsdetails->getData('phone_number_id');
+if ($provision_phoneNumber) {
+    $phonecollection = $objectManager->create('Cellularisrael\Mobileplans\Model\Phonenumbers');
+    $phonecollectiondata = $phonecollection->load($provision_phoneNumber);
+    $phone_number_label = $phonecollectiondata->getData('phone_number');
+}
+$phonenumberurl = $urlInterface->getUrl('mobileplans/phonenumbers/edit', ['id' => $Orderitemsdetails->getData('phone_number_id')]);
+
+$virtualNumberId = $Orderitemsdetails->getData('vn_id');
+if ($virtualNumberId) {
+    $virtualCollection = $objectManager->create('Cellularisrael\Mobileplans\Model\Virtualnumbers');
+    $virtualCollectionData = $virtualCollection->load($virtualNumberId);
+    $virtualAreaCode = $virtualCollectionData->getData('area_code');
+    $virtualPhoneNumber = $virtualCollectionData->getData('phone_number');
+    $virtualNumber = $virtualAreaCode . $virtualPhoneNumber;
+    $virtualProvider = $virtualCollectionData->getData('provider_id');
+}
+$virtualNumberUrl = $urlInterface->getUrl('mobileplans/virtualnumbers/edit', ['id' => $virtualNumberId]);
+
+$storeId = $order->getStoreId();
+
+$taxConfig = $objectManager->create('Magento\Tax\Model\Config');
+$displaySalesPricesInclTax = $taxConfig->priceIncludesTax($storeId);
+
+// X2One actions
+$authorization = $objectManager->get(\Magento\Framework\AuthorizationInterface::class);
+
+$x2OneActionsBtn = $authorization->isAllowed('Cellularisrael_Mobileplans::x2one_actions');
+$x2oneActionVoicemail = $authorization->isAllowed('Cellularisrael_Mobileplans::x2one_action_voicemail');
+$x2oneActionVoicemailLanguage = $authorization->isAllowed('Cellularisrael_Mobileplans::x2one_action_voicemail_language');
+$x2oneActionCancelAllLocations = $authorization->isAllowed('Cellularisrael_Mobileplans::x2one_action_cancel_all_locations');
+$x2oneActionReregisterInHlr = $authorization->isAllowed('Cellularisrael_Mobileplans::x2one_action_reregister_in_hlr');
+$x2oneActionUnblockKosherMsisdn = $authorization->isAllowed('Cellularisrael_Mobileplans::x2one_action_unblock_kosher_msisdn');
+$x2oneActionResetVoicemailPassword = $authorization->isAllowed('Cellularisrael_Mobileplans::x2one_action_reset_voicemail_password');
+$x2oneActionDeleteVoicemailMessages = $authorization->isAllowed('Cellularisrael_Mobileplans::x2one_action_delete_voicemail_messages');
+$x2oneActionSendApn = $authorization->isAllowed('Cellularisrael_Mobileplans::x2one_action_send_apn');
+$x2oneActionUpdateUserCache = $authorization->isAllowed('Cellularisrael_Mobileplans::x2one_action_rebuild_cache');
+$x2oneActionCallerId = $authorization->isAllowed('Cellularisrael_Mobileplans::x2one_action_caller_ids');
+$x2oneActionCallForwarding = $authorization->isAllowed('Cellularisrael_Mobileplans::x2one_action_call_forwarding');
+$x2oneActionCallTracing = $authorization->isAllowed('Cellularisrael_Mobileplans::x2one_action_call_tracing');
+
+$x2oneActionPermissions = [
+    'Cellularisrael_Mobileplans::x2one_action_voicemail',
+    'Cellularisrael_Mobileplans::x2one_action_voicemail_language',
+    'Cellularisrael_Mobileplans::x2one_action_cancel_all_locations',
+    'Cellularisrael_Mobileplans::x2one_action_reregister_in_hlr',
+    'Cellularisrael_Mobileplans::x2one_action_unblock_kosher_msisdn',
+    'Cellularisrael_Mobileplans::x2one_action_reset_voicemail_password',
+    'Cellularisrael_Mobileplans::x2one_action_delete_voicemail_messages',
+    'Cellularisrael_Mobileplans::x2one_action_send_apn'
+];
+
+$showX2oneUpdateButton = false;
+
+foreach ($x2oneActionPermissions as $permission) {
+    if ($authorization->isAllowed($permission)) {
+        $showX2oneUpdateButton = true;
+        break;
+    }
+}
+
+?>
+
+
+<?php foreach ($items as $_item):
+    $product = $objectManager->create('Magento\Catalog\Model\Product')->load($_item->getProductId());
+    $currencyString = "USD";
+    if ($_item->getStoreId() == 3 || $_item->getStoreId() == 4) {
+        $currencyString = "ILS";
+    }
+    $provider = "By Cellular Israel";
+    if ($_item->getMerchant() == 2) {
+        $provider = "By Provider";
+    }
+
+    if ($_item->getIsPlan()) { ?>
+        <tr class="planned-product">
+            <td class="col item">
+                <div class="product-item-image">
+                    <a href="<?= $block->escapeUrl($bundleProduct->getProductUrl()) ?>"
+                       title="<?= $block->escapeHtml($_item->getProductName()) ?>"
+                       tabindex="-1"
+                       class="product-item-photo">
+                        <?php
+                        $image_url = $imageHelper->getDefaultPlaceholderUrl('small_image');
+                        if ($bundleProduct->getSmallImage()) {
+                            $prodImg = $imageHelper->init($bundleProduct, 'small_image')->setImageFile($bundleProduct->getSmallImage())->resize(200, 200);
+                            try {
+                                // testing to make sure image exists, if it doesn't this will throw an error and end up in the catch
+                                $prodImg->getResizedImageInfo();
+                                $image_url = $prodImg->getUrl();
+                            } catch (\Exception $e) {
+                                $adminOrderLogger->warn($e->getMessage());
+                                $adminOrderLogger->warn($bundleProduct->getSmallImage());
+                            }
+
+                            $attributeSet = $objectManager->get('Magento\Eav\Api\AttributeSetRepositoryInterface');
+                            $attribute = $attributeSet->get($bundleProduct->getAttributeSetId());
+                            $productattributeset = $attribute->getAttributeSetName();
+                        }
+                        ?>
+                        <span class="product-image-container">
+                            <span class="product-image-wrapper">
+                                <img class="product-image-photo" src="<?= $image_url ?>"/>
+                            </span>
+                        </span>
+                    </a>
+                </div>
+                <div class="product-item-details">
+                    <div class="product-important-detail">
+                        <strong class="product-item-name">
+                            <?php if (isset($productattributeset) && $productattributeset == 'Day-Plan'): ?>
+                                <?= $bundleProduct->getName(); ?>
+                            <?php else: ?>
+                                <?= $block->escapeHtml($_item->getName()) ?>
+                            <?php endif; ?>
+                        </strong>
+                        <?php
+                        $orderItemsDetails = $objectManager->create('Cellularisrael\Mobileplans\Model\Orderitemsdetails')->load($_item->getParentItemId(), 'sales_order_item_id');
+
+                        ?>
+                        <div class="product-selected-time">
+                            <div class="active-time">
+                                <span class="label"><?= __('Start date'); ?></span>
+                                <span
+                                    class="content"><?= $advanceBundleHelper->getFormatedDate($orderItemsDetails->getStartDate()); ?></span>
+                            </div>
+                            <div class="active-time" style="white-space: nowrap;">
+                                <span class="label"><?= __('End date'); ?></span>
+                                <span
+                                    class="content"><?= $advanceBundleHelper->getFormatedDate($orderItemsDetails->getEndDate()); ?></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="cart-input-sec">
+                        <?php if ($parentItem->getItemComment()) { ?>
+                            <div class="cart-customer-nick">
+                                <label><span class="label"><?= $block->escapeHtml(__('Plan User')) ?></span></label>
+                                <label><span class="label"><?= $parentItem->getItemComment(); ?></span></label>
+                            </div>
+                        <?php } ?>
+                        <div class="field qty">
+                            <label><span class="label"><?= $block->escapeHtml(__('Quantity')) ?></span></label>
+                            <label><span class="label"><?= $parentItem->getQtyOrdered() * 1; ?></span></label>
+                        </div>
+                    </div>
+                </div>
+            </td>
+
+            <?php if ($_item->getIsSubscription()): ?>
+                <td class="col price onetime">
+                    &nbsp;
+                </td>
+
+                <td class="col price monthly">
+                    <?php if (strpos($provider, 'Provider') !== false && $_item->getIsraelPrice()) { ?>
+                        <span
+                            class="currency-symbol"><?= $advanceBundleHelper->getCurrencySymbol('ILS'); ?></span><?= number_format(($_item->getIsraelPrice() * $_item->getQtyOrdered()), 2); ?>
+                        <span class="merchant"><?= __($provider) ?></span>
+                    <?php } else { ?>
+                        <?php
+                        if ($displaySalesPricesInclTax == 1) {
+                            $_price = $_item->getPriceInclTax();
+                        } else {
+                            $_price = $_item->getPrice();
+                        }
+                        ?>
+                        <span
+                            class="currency-symbol"><?= $advanceBundleHelper->getCurrencySymbol($currencyString); ?></span><?= number_format(($_price * $_item->getQtyOrdered()), 2); ?>
+                        <span class="merchant"><?= __($provider) ?></span>
+                    <?php } ?>
+
+                </td>
+
+            <?php else: ?>
+                <td class="col price onetime">
+                    <?php if (strpos($provider, 'Provider') !== false && $_item->getIsraelPrice()) { ?>
+                        <span
+                            class="currency-symbol"><?= $advanceBundleHelper->getCurrencySymbol('ILS'); ?></span><?= number_format(($_item->getIsraelPrice() * $_item->getQtyOrdered()), 2); ?>
+                        <span class="merchant"><?= __($provider) ?></span>
+                    <?php } else { ?>
+                        <span
+                            class="currency-symbol"><?= $advanceBundleHelper->getCurrencySymbol($currencyString); ?></span><?= number_format(($_item->getPrice() * $_item->getQtyOrdered()), 2); ?>
+                        <span class="merchant"><?= __($provider) ?></span>
+                    <?php } ?>
+                </td>
+                <td class="col price monthly">
+                    &nbsp;
+                </td>
+            <?php endif; ?>
+
+            <td class="col price onetime" style="line-height: unset; ">
+                <?php if ($virtualNumberId): ?>
+                    <a style="font-size: 25px" href="<?= $virtualNumberUrl ?>" title="<?= $virtualNumber ?>"
+                       tabindex="-1" class="product-item-photo"><?= $virtualNumber ?></a>
+                    <?php
+                    if ($virtualProvider == 1) {
+                        $jivetelDidStatusActionUrl = $block->getUrl('mobileplans/order/didstatus') . 'order_id/' . $block->getOrder()->getId() . '/did_number/' . $virtualNumber;
+                        ?>
+                        <a href="<?php echo $jivetelDidStatusActionUrl; ?>"
+                           style="font-size: 10px; display: block"><?php echo __("Check virtual number status"); ?></a>
+                    <?php } ?>
+                <?php else: ?>
+                    &nbsp;
+                <?php endif; ?>
+                <?php if ($linkedPlanOrderNumber): ?>
+                    <?php $salesOrderUrl = $block->getUrl('sales/order/view') . 'order_id/' . $oldOrderId ?>
+                    <div class="linked-plan"
+                         style="font-size: 12px;color: #007bdb;"><?php echo __("VN plan on order number "); ?>
+                        <a target="_blank" href="<?php echo $salesOrderUrl; ?>"
+                           style="font-size: 12px;color: #007bdb; display: block"><?= $linkedPlanOrderNumber ?></a>
+                    </div>
+                <?php endif; ?>
+            </td>
+            <td class="col price onetime">
+                <?php if ($provision_phoneNumber): ?>
+                    <table>
+                        <tr>
+                            <td>
+                                <a href="<?= $phonenumberurl ?>" title="<?= $phone_number_label ?>" tabindex="-1"
+                                   class="product-item-photo"><?= $phone_number_label ?></a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="font-size: 11px; padding: 0;"><?php echo "sim: $sim_number_label" ?></td>
+                        </tr>
+                        <?php if ($parentItem->getPhoneCarrierId() == \LR\ProvisionOrder\Helper\Data::CARRIER_ID_HOT) : ?>
+                            <tr>
+                                <td>
+                                    <button class="check-phone-status"
+                                            data-carrier=<?= \LR\ProvisionOrder\Helper\Data::CARRIER_ID_HOT ?> data-phone="<?= $phone_number_label ?>">
+                                        HOT Status
+                                    </button>
+                                </td>
+                            </tr>
+                        <?php endif; ?>
+                    </table>
+                <?php else: ?>
+                    &nbsp;
+                <?php endif; ?>
+                <?php if ($parentItem->getPhoneCarrierId() == \LR\ProvisionOrder\Helper\Data::CARRIER_ID_X2ONE && $Orderitemsdetails->getExternalId()) : ?>
+                    <table>
+                        <tr>
+                            <td>
+                                <button class="check-x2one-plan-status"
+                                        data-carrier=<?= \LR\ProvisionOrder\Helper\Data::CARRIER_ID_X2ONE ?> data-domain-user-id="<?= (int)$Orderitemsdetails->getExternalId() ?>">
+                                    X2One Status
+                                </button>
+                            </td>
+                        <tr>
+                            <?php if ($x2OneActionsBtn): ?>
+                                <td>
+                                    <button class="check-x2one-plan-actions"
+                                            data-carrier=<?= \LR\ProvisionOrder\Helper\Data::CARRIER_ID_X2ONE ?> data-domain-user-id="<?= (int)$Orderitemsdetails->getExternalId() ?>">
+                                        X2One Actions
+                                    </button>
+                                </td>
+                            <?php endif; ?>
+                        </tr>
+                    </table>
+                <?php endif; ?>
+            </td>
+            <td class="col price onetime">
+                <?php
+                $device = $objectManager->create('Cellularisrael\Devices\Model\ResourceModel\DevicesLog\Collection')
+                    ->addFieldToFilter('plan_id', $provision_order_id);
+
+                $device->getSelect()->joinLeft(
+                    ['cd' => 'cellisrael_devices'],
+                    'main_table.device_id = cd.id',
+                    ['*']
+                );
+                ?>
+                <?php if ($device->getSize() > 0 && $device->getFirstItem()->getLabelId()): ?>
+                    <?php $deviceUrl = $urlInterface->getUrl('devices/index/edit', ['id' => $device->getFirstItem()->getId()]); ?>
+                    <label style="font-size: 10px;display: block;"><a href="<?= $deviceUrl ?>" target="_blank"
+                                                                      title="<?= $device->getFirstItem()->getLabelId() ?>"
+                                                                      tabindex="-1"
+                                                                      class="product-item-photo"><?= 'Rental # ' . $device->getFirstItem()->getLabelId() ?></a></label>
+                <?php endif; ?>
+                <?php if (!is_null($Orderitemsdetails->getReturnReceivedOntime())): ?>
+                    <?php if ($device->getSize() > 0 && $device->getFirstItem()->getDeviceCondition() == 3): ?>
+                        <label style="font-weight: bold;font-size: 12px;display: block;">device is lost / stolen</label>
+                    <?php else: ?>
+                        <span style="font-weight: bold;font-size: 14px;display: block;">Returned</span>
+                        <?php if ($Orderitemsdetails->getReturnReceivedOntime() == 1): ?>
+                            <label style="font-size: 12px;display: block;">On Time: Yes</label>
+                        <?php else: ?>
+                            <label style="font-size: 12px;display: block;">On Time: No</label>
+                        <?php endif; ?>
+                    <?php endif; ?>
+
+                    <?php if (!is_null($Orderitemsdetails->getDeviceLocationNew())): ?>
+                        <label style="font-size: 12px;display: block;">Location change
+                            to: <?= $Orderitemsdetails->getDeviceLocationNew() ?></label>
+                    <?php endif; ?>
+                    <?php if ($device->getSize() > 0 && $device->getFirstItem()->getDeviceCondition() == 2): ?>
+                        <label style="font-size: 12px;display: block;">device marked as defective</label>
+                    <?php endif; ?>
+                    <?php if (!is_null($Orderitemsdetails->getDeviceNote())): ?>
+                        <label style="font-size: 12px;display: block;">Notes added</label>
+                    <?php endif; ?>
+                <?php endif; ?>
+            </td>
+        </tr>
+
+    <?php } else { ?>
+        <tr id="order-item-row-<?php /* @escapeNotVerified */
+        echo $_item->getId() ?>"
+            class="<?php if ($_item->getParentItem()): ?>item-options-container<?php else: ?>item-parent<?php endif; ?>">
+            <td class="col item">
+                <div class="product-item-image">
+                <span class="product-item-photo">
+                    <?php
+                    $image_url = $imageHelper->getDefaultPlaceholderUrl('small_image');
+
+                    if ($product && $product->getSmallImage()) {
+                        $prodImg = $imageHelper->init($product, 'small_image')->setImageFile($product->getSmallImage())->resize(200, 200);
+                        try {
+                            // testing to make sure image exists, if it doesn't this will throw an error and end up in the catch
+                            $prodImg->getResizedImageInfo();
+                            $image_url = $prodImg->getUrl();
+                        } catch (\Exception $e) {
+                            $adminOrderLogger->warn($e->getMessage());
+                            $adminOrderLogger->warn($bundleProduct->getSmallImage());
+                        }
+                    }
+                    ?>
+                    <span class="product-image-container">
+                        <span class="product-image-wrapper">
+                            <img class="product-image-photo" src="<?= $image_url ?>"/>
+                        </span>
+                    </span>
+                </span>
+                </div>
+                <div class="product-item-details">
+                    <div class="product-important-detail">
+                        <strong class="product-item-name">
+                            <?= $block->escapeHtml($_item->getName()) ?>
+                        </strong>
+                    </div>
+                </div>
+            </td>
+
+            <?php if ($_item->getIsSubscription()): ?>
+                <td class="col price onetime">
+                    &nbsp;
+                </td>
+
+                <td class="col price monthly">
+                    <?php if (strpos($provider, 'Provider') !== false && $_item->getIsraelPrice()) { ?>
+                        <span
+                            class="currency-symbol"><?= $advanceBundleHelper->getCurrencySymbol('ILS'); ?></span><?= number_format(($_item->getIsraelPrice() * $_item->getQtyOrdered()), 2); ?>
+                        <span class="merchant"><?= __($provider) ?></span>
+                    <?php } else { ?>
+                        <?php
+                        if ($displaySalesPricesInclTax == 1) {
+                            $_price = $_item->getPriceInclTax();
+                        } else {
+                            $_price = $_item->getPrice();
+                        }
+                        ?>
+                        <span
+                            class="currency-symbol"><?= $advanceBundleHelper->getCurrencySymbol($currencyString); ?></span><?= number_format(($_price * $_item->getQtyOrdered()), 2); ?>
+                        <span class="merchant"><?= __($provider) ?></span>
+                    <?php } ?>
+                </td>
+
+            <?php else: ?>
+                <td class="col price onetime">
+                    <?php if (strpos($provider, 'Provider') !== false && $_item->getIsraelPrice()) { ?>
+                        <span
+                            class="currency-symbol"><?= $advanceBundleHelper->getCurrencySymbol('ILS'); ?></span><?= number_format(($_item->getIsraelPrice() * $_item->getQtyOrdered()), 2); ?>
+                        <span class="merchant"><?= __($provider) ?></span>
+                    <?php } else { ?>
+                        <?php
+                        if ($displaySalesPricesInclTax == 1) {
+                            $_price = $_item->getPriceInclTax();
+                        } else {
+                            $_price = $_item->getPrice();
+                        }
+                        ?>
+
+                        <span
+                            class="currency-symbol"><?= $advanceBundleHelper->getCurrencySymbol($currencyString); ?></span><?= number_format(($_price * $_item->getQtyOrdered()), 2); ?>
+                        <span class="merchant"><?= __($provider) ?></span>
+                    <?php } ?>
+                </td>
+                <td class="col price monthly">
+                    &nbsp;
+                </td>
+            <?php endif; ?>
+            <?php $type = $_item->getProductType(); ?>
+            <?php $itemId = $_item->getId(); ?>
+            <?php $itemSku = $_item->getSku(); ?>
+
+        </tr>
+    <?php } ?>
+    <?php
+    $phoneStatusUrl = $block->getUrl('mobileplans/order/PhoneStatus') . 'order_id/' . $block->getOrder()->getId() . '/phone_number/';
+    $x2OneStatusUrl = $block->getUrl('mobileplans/order/X2OneStatus') . 'order_id/' . $block->getOrder()->getId() . '/user_id/';
+    $x2OneCIDUrl = $block->getUrl('mobileplans/x2one/callerids') . 'user_id/';
+    $x2OneCFUrl = $block->getUrl('mobileplans/x2one/callForwarding') . 'user_id/' . (int)$Orderitemsdetails->getExternalId();
+    $x2OneActionsUrl = $block->getUrl('mobileplans/order/X2OneActions') . 'order_id/' . $block->getOrder()->getId() . '/user_id/';
+    $x2OneActionsUpdateUrl = $block->getUrl('mobileplans/order/X2OneActionsUpdate');
+    $x2OneSendMobileActionUrl = $block->getUrl('mobileplans/order/X2OneSendMobileAction') . 'action/';
+    $x2OneResetVoicemailUrl = $block->getUrl('mobileplans/x2one/resetvoicemail') . 'domain_user_id/' . (int)$Orderitemsdetails->getExternalId();
+    $x2OneRebuildCacheUrl = $block->getUrl('mobileplans/x2one/rebuildcache') . 'domain_user_id/' . (int)$Orderitemsdetails->getExternalId();
+    $x2OneTraceUrl = $block->getUrl('mobileplans/x2one/trace') . 'domain_user_id/' . (int)$Orderitemsdetails->getExternalId() . '/trace_type/';
+
+endforeach; ?>
+<tr>
+    <td>
+        <div id="popup-modal-hot" style="display:none;margin: 0 auto;text-align: center;max-width: 600px;"></div>
+        <div id="popup-modal-x2one" style="display:none;margin: 0 auto;text-align: center;max-width: 600px;"></div>
+        <div id="popup-modal-x2one-actions" style="display:none;margin: 0 auto;text-align: center;max-width: 600px;">
+            <form id='x2one-actions-form'>
+                <table style="text-align: center;">
+                    <caption class="table-title" style="font-size: 2em"></caption>
+                    <?php if ($x2oneActionVoicemail): ?>
+                    <tr>
+                        <td style="width:300px">Voicemail</td>
+                        <td>
+                            <span class="description">Disabled</span>
+                            <label class="switch">
+                                <input id="x2one-voicemail-checkbox" name="voicemail" type="checkbox">
+                                <span class="slider round"></span>
+                            </label>
+                            <span class="description">Enabled</span>
+                        </td>
+                    </tr>
+                    <?php endif; if ($x2oneActionVoicemailLanguage):?>
+                    <tr>
+                        <td>Voicemail Language</td>
+                        <td>
+                            <span class="description">Hebrew</span>
+                            <label class="switch">
+                                <input id="x2one-voicemail-language-checkbox" name="voicemail_language" type="checkbox">
+                                <span class="slider round"></span>
+                            </label>
+                            <span class="description">English</span>
+                        </td>
+                    </tr>
+                    <?php endif; if ($x2oneActionCancelAllLocations):?>
+                    <tr>
+                        <td>Cancel All Locations</td>
+                        <td>
+                            <button id="x2one-action-cancel-all-locations" title="Cancel all locations" type="button"
+                                    class="action- scalable primary">
+                                <span>Cancel All Locations</span>
+                            </button>
+                        </td>
+                    </tr>
+                    <?php endif; if ($x2oneActionReregisterInHlr):?>
+                    <tr>
+                        <td>Reregister in HLR</td>
+                        <td>
+                            <button id="x2one-action-reregister-in-hlr" title="Reregister in HLR" type="button"
+                                    class="action- scalable primary">
+                                <span>Reregister in HLR</span>
+                            </button>
+                        </td>
+                    </tr>
+                    <?php endif; if ($x2oneActionUnblockKosherMsisdn):?>
+                    <tr>
+                        <td>Unblock Kosher MSISDN</td>
+                        <td>
+                            <button id="x2one-unblock-kosher-msisdn" title="Unblock Kosher MSISDN" type="button"
+                                    class="action- scalable primary">
+                                <span>Unblock Kosher MSISDN</span>
+                            </button>
+                        </td>
+                    </tr>
+                    <?php endif; if ($x2oneActionResetVoicemailPassword):?>
+                    <tr>
+                        <td>Reset Voicemail Password</td>
+                        <td>
+                            <button id="x2one-reset-voicemail-password" title="Reset Voicemail Password" type="button"
+                                    class="action- scalable primary">
+                                <span>Reset Voicemail Password</span>
+                            </button>
+                        </td>
+                    </tr>
+                    <?php endif; if ($x2oneActionDeleteVoicemailMessages):?>
+                    <tr>
+                        <td>Delete Voicemail Messages</td>
+                        <td>
+                            <button id="x2one-delete-voicemail-messages" title="Delete Voicemail Messages" type="button"
+                                    class="action- scalable primary">
+                                <span>Delete Voicemail Messages</span>
+                            </button>
+                        </td>
+                    </tr>
+                    <?php endif; if ($x2oneActionSendApn):?>
+                    <tr>
+                        <td>Send APN</td>
+                        <td>
+                            <button id="x2one-send-apn" title="Send APN" type="button" class="action- scalable primary">
+                                <span>Send APN</span>
+                            </button>
+                        </td>
+                    </tr>
+                    <?php endif; if ($x2oneActionUpdateUserCache):?>
+                    <tr>
+                        <td>Update User Cache</td>
+                        <td>
+                            <button id="x2one-update-user-cache" title="Update User Cache" type="button"
+                                    class="action- scalable primary">
+                                <span>Update User Cache</span>
+                            </button>
+                        </td>
+                    </tr>
+                    <?php endif; if ($x2oneActionCallerId):?>
+                    <tr>
+                        <td>Caller IDs</td>
+                        <td>
+                            <button title="Update User Cache" type="button"
+                                    class="action- scalable primary check-x2one-plan-callerids"
+
+                                        data-carrier=<?= \LR\ProvisionOrder\Helper\Data::CARRIER_ID_X2ONE ?> data-domain-user-id="<?= (int)$Orderitemsdetails->getExternalId() ?>"">
+                                    <span> Check Caller IDs </span>
+                                </button>
+                            </td>
+                        </tr>
+                    <?php endif;
+                    if ($x2oneActionCallForwarding): ?>
+                        <tr>
+                            <td>Call Forwarding</td>
+                            <td>
+                                <button title="Call Forwarding" type="button"
+                                        class="action- scalable primary check-x2one-plan-call-forwarding"
+
+                                        data-carrier="<?= \LR\ProvisionOrder\Helper\Data::CARRIER_ID_X2ONE ?>" data-domain-user-id="<?= (int)$Orderitemsdetails->getExternalId() ?>">
+                                    <span> Call Forwarding </span>
+                                </button>
+                            </td>
+                        </tr>
+                    <?php endif; ?>
+                </table>
+                <input id='x2one-action-form-submit' class="action-default scalable action-save action-secondary"
+                       type="submit" value="Update">
+            </form>
+        </div>
+
+
+        <div id="popup-modal-x2one-call-forwarding"
+             style="display:none;margin: 0 auto;text-align: center;max-width: 300px;">
+            <form id="form-cf-select">
+                <table style="" id="call-forwarding-table" class="responsive-table">
+                    <caption>Call Forwarding</caption>
+                    <thead>
+                    <tr>
+                        <th scope="col">Number</th>
+                        <th scope="col">Action</th>
+                        <th scope="col">Destination</th>
+                        <th scope="col">Option</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+                <input id='x2one-cf-submit' type="button" class="action-default scalable action-save action-primary"
+                       value="Update">
+            </form>
+        </div>
+
+        <div id="popup-modal-x2one-callerids"
+             style="display:none;margin: 0 auto;text-align: center;max-width: 300px;">
+            <form id="form-cli-select">
+                <div class="dropdown">
+                    <span class="shipping_method_all">Default Caller ID</span>
+                    <select name="default_clid" class="cli-select control-select">
+
+                    </select>
+                </div>
+                <div class="dropdown">
+                    <span>US Caller ID</span>
+                    <select name="1" class="cli-select control-select">
+
+                    </select>
+                </div>
+                <div class="dropdown">
+                    <span>UK CallerId</span>
+                    <select name="44" class="cli-select control-select">
+
+                    </select>
+                </div>
+                <div class="dropdown">
+                    <span>Israel CallerId</span>
+                    <select name="972" class="cli-select control-select">
+
+                    </select>
+                </div>
+                <input id='x2one-callerid-form-submit' class="action-default scalable action-save action-secondary"
+                       type="submit" value="Update">
+            </form>
+        </div>
+    </td>
+</tr>
+
+<script type="text/javascript">
+    (function () {
+        require(['jquery', 'Magento_Ui/js/modal/modal'], function ($, modal) {
+            var x2OneActionsBtn = "<?= $x2OneActionsBtn;?>";
+
+            var options = {
+                type: 'popup',
+                responsive: true,
+                innerScroll: false,
+                title: 'Hot Details',
+                buttons: [{
+                    text: "Close",
+                    class: '',
+                    click: function () {
+                        $("#popup-modal-hot").modal("closeModal");
+                    }
+                }]
+            };
+            var popup = modal(options, $('#popup-modal-hot'));
+            var popupX2oneOptions = {
+                type: 'popup',
+                responsive: true,
+                innerScroll: false,
+                title: 'X2one Details',
+                buttons: [{
+                    text: "Close",
+                    class: '',
+                    click: function () {
+                        $("#popup-modal-x2one").modal("closeModal");
+                    }
+                }]
+            };
+            var popupX2one = modal(popupX2oneOptions, $('#popup-modal-x2one'));
+
+            var popupX2oneActionOptions = {
+                type: 'popup',
+                responsive: true,
+                innerScroll: false,
+                title: 'X2one Actions',
+                buttons: [{
+                    text: "Close",
+                    class: '',
+                    click: function () {
+                        $("#popup-modal-x2one-actions").modal("closeModal");
+                    }
+                }]
+            };
+            if (x2OneActionsBtn) {
+                var popupX2oneActions = modal(popupX2oneActionOptions, $('#popup-modal-x2one-actions'));
+            }
+
+            var popupX2oneCallerIdsOptions = {
+                type: 'popup',
+                responsive: true,
+                innerScroll: false,
+                title: 'X2one CallerIds',
+                buttons: [{
+                    text: "Close",
+                    class: '',
+                    click: function () {
+                        $("#popup-modal-x2one-callerids").modal("closeModal");
+                    }
+                }]
+            };
+            var popupX2oneCallerids = modal(popupX2oneCallerIdsOptions, $('#popup-modal-x2one-callerids'));
+
+            var popupX2oneCallForwardingOptions = {
+                type: 'popup',
+                responsive: true,
+                innerScroll: false,
+                title: 'X2one Call Forwarding',
+                buttons: [{
+                    text: "Close",
+                    class: '',
+                    click: function () {
+                        $("#popup-modal-x2one-call-forwarding").modal("closeModal");
+                    }
+                }]
+            };
+            var popupX2oneCallerids = modal(popupX2oneCallForwardingOptions, $('#popup-modal-x2one-call-forwarding'));
+
+            // This js code runs once per order item and multiple items per order may result in extra click handlers
+            // https://stackoverflow.com/a/13475122/3376305
+            $(".check-phone-status").unbind('click.phoneStatus');
+            $(".check-phone-status").bind('click.phoneStatus', function (e) {
+                var statusButton = $(this);
+                $('body').trigger('processStart');
+                var phone = statusButton.attr("data-phone");
+                checkPhoneStatus(phone);
+            })
+
+            $("#x2one-cf-submit").unbind('click.cfSubmit');
+            $("#x2one-cf-submit").bind('click.cfSubmit', function (e) {
+                let x2one_cf_table = $("#call-forwarding-table tbody");
+
+                let data = []
+                x2one_cf_table.children().each(function (row) {
+                    let action = null
+                    let tr = $(this);
+                    let tr_did = tr.find('.did')
+                    let tr_destination = tr.find('.destination input')
+                    let destination = tr_destination.val()
+                    let destination_dirty = tr_destination.hasClass('dirty')
+                    let did_id = tr_did.attr('data-did-id')
+                    let did_number = tr_did.text()
+                    let cf_id = tr.find('.x2one-cf-reset').attr('data-cf-id');
+
+                    if (!destination && cf_id) {
+                        action = 'delete'
+                    } else if (destination && !cf_id) {
+                        action = 'create';
+                    } else if (destination && cf_id && destination_dirty) {
+                        action = 'update';
+                    }
+
+                    if (action) {
+                        data.push({
+                            action: action,
+                            did_id: did_id,
+                            did_number: did_number,
+                            destination: destination,
+                            cf_id: cf_id,
+                            priority: row + 1
+                        })
+                    }
+
+                })
+
+                postX2oneUpdate({data: data}, "<?= $x2OneCFUrl?>")
+                $('#popup-modal-x2one-call-forwarding').modal("closeModal");
+            })
+
+            function checkPhoneStatus(phone) {
+                $.ajax({
+                    url: '<?=$phoneStatusUrl?>' + phone,
+                    type: 'GET',
+                    //async: false,
+                    dataType: 'json',
+                    success: function (data, status, xhr) {
+                        var html = '<h3>Status: {{STATUS}}</h3>';
+                        if (data.status === "failed" && data.errMsg != "") {
+                            html += '<br><h2 style="color:red">' + data.errMsg + '</h2><br>';
+                        }
+                        html += '<table style="text-align: center;"><tr><th style="width:200px">Phone Number</th><th style="width:200px">Sim Number</th><th style="width:200px">subscriberPo</th><th style="width:200px">Status</th></tr>';
+                        if (data.status === "success") {
+                            html += '<tr><td style="width:200px">' + data.data["csr:msisdn"] + '</td>' +
+                                '<td style="width:200px">' + data.data["csr:simNumber"] + '</td>' +
+                                '<td style="width:200px">' + data.data["csr:subscriberPo"] + '</td>' +
+                                '<td style="width:200px">' + data.data["csr:subscriberStatus"] + '</td></tr>';
+                        }
+                        html += '</table>';
+                        html += '<div style="margin-top:30px;font-size:12px;text-align:left"><b>Status Note:</b> 1 = Active, 2 = Disconnected, 3 = Suspended</div>';
+                        html = html.replace("{{STATUS}}", data.status);
+                        $("#popup-modal-hot").html(html);
+                        $("#popup-modal-hot").modal("openModal");
+                        $('body').trigger('processStop');
+                    },
+                    error: function (xhr, status, errorThrown) {
+                        console.error(errorThrown);
+                        $('body').trigger('processStop');
+                        alert("Something went wrong. Please check logs in console.");
+                    }
+                });
+            }
+
+            function isNestedArrayEmpty(arr) {
+                if (Array.isArray(arr)) {
+                    if (arr.length === 0) {
+                        return true; // Empty array
+                    }
+                } else {
+                    return false // not an Array and not empty
+                }
+
+                for (let i = 0; i < arr.length; i++) {
+                    if (!isNestedArrayEmpty(arr[i])) {
+                        return false; // Array contains non-empty nested arrays
+                    }
+                }
+
+                return true; // Array is empty or contains only empty nested arrays
+            }
+
+
+            // trace_type: 1 = local, 2 = international, 3 = custom
+            function traceCall(trace_type, custom_object = {}) {
+                let names
+                switch (trace_type) {
+                    case 1: // local
+                        names = ['Local Inbound', 'Local Outbound'];
+                        break;
+                    case 2: // international
+                        names = ['International Inbound', 'International Outbound'];
+                        break;
+                    case 3: // custom
+                        names = ['Custom Call']
+                    default:
+                        break;
+                }
+
+                let table = $('#trace_response');
+                let tbody = table.find('tbody');
+                let url = '<?= $x2OneTraceUrl ?>' + trace_type;
+                if (trace_type === 3) {
+                    url += `/custom_direction/${custom_object.call_direction}/custom_number/${custom_object.number}`
+                }
+
+                tbody.empty()
+
+                $('body').trigger('processStart');
+
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function (data, status, xhr) {
+
+                        $('body').trigger('processStop');
+                        data.message.forEach(function (call) {
+                            var success = isNestedArrayEmpty(call) ? 'failed' : "success";
+                            tbody.append(`<tr><th scope="row">${names.shift()}</th><td></td><td></td><td>${success}</td></tr>`);
+
+                            function addLeg(call) {
+                                call.forEach(function (leg) {
+                                    if (Array.isArray(leg)) {
+                                        addLeg(leg)
+                                    } else {
+                                        tbody.append(`<tr><th scope="row"></th><td>${leg.cli}</td><td>${leg.destination}</td><td class='green'>✔</td></tr>`);
+                                    }
+                                })
+                            }
+
+                            addLeg(call)
+                        });
+                        table.css('display', 'table')
+                    },
+                    error: function (xhr, status, errorThrown) {
+                        console.log("failed");
+                    }
+                })
+            }
+
+            // This js code runs once per order item and multiple items per order may result in extra click handlers
+            // https://stackoverflow.com/a/13475122/3376305
+            $(".check-x2one-plan-status").unbind('click.x2oneStatus');
+            $(".check-x2one-plan-status").bind('click.x2oneStatus', function (e) {
+                var statusButton = $(this);
+                $('body').trigger('processStart');
+                var domainUserId = statusButton.attr("data-domain-user-id");
+
+                function buildTraceListeners() {
+                    $('#x2one-trace-local').click(function (e) {
+                        return traceCall(1)
+                    })
+                    $('#x2one-trace-international').click(function (e) {
+                        return traceCall(2)
+                    })
+                    $('form#x2one-custom-trace-form').unbind('submit');
+                    $('form#x2one-custom-trace-form').submit(function (event) {
+                        event.preventDefault(); // Prevent form submission
+                        const formValues = $(this).serializeArray();
+                        $(`#${event.target.id} input[type="checkbox"]:not(:checked)`).each(function () {
+                            formValues.push({name: this.name, value: 'inbound'}); //unchecked is inbound
+                        });
+                        let newValues = {}
+                        for (const row of formValues) {
+                            newValues[row.name] = row.value
+                        }
+                        if (newValues.call_direction === 'on') {
+                            newValues.call_direction = 'outbound' // on is outbound
+                        }
+                        traceCall(3, newValues);
+                    })
+                }
+
+                $.ajax({
+                    url: '<?= $x2OneStatusUrl ?>' + domainUserId,
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function (data, status, xhr) {
+                        let call_trace_permissions = '<?= $x2oneActionCallTracing ?>';
+                        var html = `<div class="container" style="display: inline">
+                            <table class="responsive-table">
+                            <caption>API Status: ${data.status || 'success'}</caption>`;
+                        if (data.status === "failed" && data.message != "") {
+                            html += '<br><h2 style="color:red">' + data.message + '</h2><br>';
+                        }
+
+                        function objectToArray(objectOrArray) {
+                            return Array.isArray(objectOrArray) ? objectOrArray : Object.entries(objectOrArray).map(entry => entry[1]);
+                        }
+
+                        var numbers = !data.dids ? [] : objectToArray(data.dids).map(did => {
+                            const didNumber = did.did_number.startsWith('972') ? did.did_number.replace('972', '0') : did.did_number;
+                            const style = did.status === 'active' ? '' : 'color:lightgrey';
+                            return `<span style="${style}">${didNumber}</span>`;
+                        });
+                        var sims = !data.endpoints ? [] : objectToArray(data.endpoints).map(endpoint => {
+                            const iccid = endpoint.iccid;
+                            const style = endpoint.active ? '' : 'color:lightgrey';
+                            return `<span style="${style}">${iccid}</span>`;
+                        });
+                        var service = data.services && objectToArray(data.services).find(ser => ser.subscription_for.type === 'Mobile');
+                        var endpoint = data.endpoints && service && objectToArray(data.endpoints).find(ep => ep.name === service.subscription_for.name);
+                        var additional_services = Object.entries(data.services).map(entry => entry[1]).filter(service => service.subscription_for.type == "Mobile" && service.service_details.package_type == 'extra')
+                        var package = data?.package_name?.name?.EN
+                        var additional_service_names = additional_services.map(additional_service => `${additional_service.service_details.name.EN}`)
+                        var serviceItems = [];
+                        var endpoint_ids = Object.keys(data.endpoints)
+                        if (endpoint?.voice_service) serviceItems.push('voice');
+                        if (endpoint?.sms_service) serviceItems.push('sms');
+                        if (service?.service_details.func === 'kosher') serviceItems.push('kosher');
+                        if (endpoint?.data_service) serviceItems.push('data');
+                        if (endpoint?.data_limit) serviceItems.push(endpoint.data_limit + ' Gb');
+                        if (endpoint?.data_limit) serviceItems.push(`used ${endpoint.data_used || 0} Gb`);
+                        html += `
+                        <thead>
+                        <tr>
+                            <th scope="col">X2one Account</th>
+                            <th scope="col">Phone Numbers</th>
+                            <th scope="col">Endpoints</th>
+                            <th scope="col">Sim Cards</th>
+                            <th scope="col">Package Name</th>
+                            <th scope="col">Additional Packages</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Network</th>
+                            <th scope="col">Last Registered</th>
+
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <th scope="row">${data.user_name}<br>${data.user_id}</th>
+                            <td style="">${numbers.join('<br>')}</td>
+                            <td style="">${endpoint_ids.join('<br>')}</td>
+                            <td style="">${sims.join('<br>')}</td>
+                            <td style="">${package}</td>
+                            <td style="">${additional_service_names.join('<br>')}</td>
+                            <td style="">${serviceItems.join('<br>')}</td>
+                            <td style="">${endpoint?.current_registered_network}</td>
+                            <td style="">${endpoint?.last_registration}</td>
+                        </tr>
+                        </tbody>
+                    </table>`;
+                        if (call_trace_permissions) {
+                            html += `<form id='x2one-custom-trace-form'>
+                            <table class="responsive-table">
+                                    <tr>
+                                        <th>
+                                            <button id="x2one-trace-local" title="Trace Local Calls" type="button" class="action- scalable primary" >
+                                                <span>Local Calls</span>
+                                            </button>
+                                        </th>
+                                        <th>
+                                            <button id="x2one-trace-international" title="International Calls" type="button" class="action- scalable primary" >
+                                                <span>International Calls</span>
+                                            </button>
+                                        </th>
+                                        <th>
+                                            <span class="description">Inbound</span>
+                                            <label class="switch">
+                                                <input id="x2one-custom-call-trace" name="call_direction" type="checkbox">
+                                                <span class="slider round"></span>
+                                            </label>
+                                            <span class="description">Outbound</span>
+                                            <br/>
+                                            <input name="number" type="tel" required>
+                                             <br/>
+                                            <input id='x2one-trace-form-submit' class="action-default scalable action-save action-primary" type="submit" value="Custom Trace">
+                                        </th>
+                                    </tr>
+                                </table>
+                                </form>`;
+
+
+                            html += `
+                        <table style="display: none" id="trace_response" class="responsive-table">
+                            <caption>Call Trace</caption>
+                            <thead>
+                                <tr>
+                                    <th scope="col">Call</th>
+                                    <th scope="col">CallerId</th>
+                                    <th scope="col">Destination</th>
+                                    <th scope="col">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>`;
+                        }
+                        html += '</div>'
+
+
+                        $("#popup-modal-x2one").html(html);
+                        $("#popup-modal-x2one").modal("openModal");
+                        $('body').trigger('processStop');
+                        $(document).ready(function () {
+                            buildTraceListeners()
+                        })
+                    },
+                    error: function (xhr, status, errorThrown) {
+                        console.error(errorThrown);
+                        $('body').trigger('processStop');
+                        alert("Something went wrong. Please check logs in console.");
+                    }
+                });
+            });
+
+            function updateX2oneValues(data) {
+                const vm = $("#x2one-voicemail-checkbox")
+                const vm_lang = $("#x2one-voicemail-language-checkbox")
+                vm.prop('checked', data.voicemail); // Set the checkbox value to true
+                vm_lang.prop('checked', data.voicemail_language === 'en'); // Set the checkbox value to true
+
+            }
+
+            function buildAjaxGetRequest(identifier, url) {
+                $(identifier).click(function () {
+                    $('body').trigger('processStart');
+                    let settings = {
+                        url: url,
+                        type: 'GET',
+                        dataType: 'json',
+                    }
+                    $.ajax(settings).done(function (response) {
+                        $('body').trigger('processStop');
+                    });
+                });
+            }
+
+            function postX2oneUpdate(data, url) {
+                data['form_key'] = window.FORM_KEY;
+                var settings = {
+                    "url": url,
+                    "method": "POST",
+                    "timeout": 0,
+                    "headers": {
+                        "Content-Type": "application/x-www-form-urlencoded"
+                    },
+                    "data": data
+                };
+                $('body').trigger('processStart');
+                $.ajax(settings).done(function (response) {
+                    $('body').trigger('processStop');
+                });
+            }
+
+
+            $(".check-x2one-plan-call-forwarding").unbind('click.x2oneCallForwarding');
+            $(".check-x2one-plan-call-forwarding").bind('click.x2oneCallForwarding', function (e) {
+                $('body').trigger('processStart');
+                $.ajax({
+                    url: '<?= $x2OneCFUrl ?>',
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function (data, status, xhr) {
+                        let call_forward_response = data;
+                        let x2one_cf_table = $("#call-forwarding-table");
+                        let tbody = x2one_cf_table.find('tbody');
+                        tbody.empty();
+                        let buttons = ` <button disabled title="Reset" type="button" class="x2one-cf-reset action- scalable secondary" >
+                                                 <span>Reset</span>
+                                            </button>`
+                        call_forward_response?.dids.forEach(did => {
+                            let row = `<tr><th scope="row" data-did-id="${did?.value}" class="did">${did?.text}</th><td class="action"></td><td class="destination"><input type="text" value=""></td><td class='options'>${buttons}</td></tr>`;
+                            tbody.append(row);
+                        });
+                        let CFs = Object.values(call_forward_response?.call_forwards).map(cf => {
+                            let id = cf.id;
+                            let [didId, number] = Object.values(cf?.data?.conditions[0][0]?.value[0]);
+                            let action = cf?.data?.actions[0]?.action;
+                            let destination = cf.data.actions[0]?.args[0];
+                            return {id: id, didId: didId, number: number, action: action, destination: destination};
+                        })
+                        tbody.children().each(
+                            function (row) {
+
+
+                                let current_row = $(this);
+                                let did = current_row.find('th.did');
+                                let action = current_row.find('td.action');
+                                let destination = current_row.find('td.destination input');
+                                let reset_button = current_row.find('td .x2one-cf-reset');
+                                let cf = CFs.filter(cf => {
+                                    return cf.number === did.text();
+                                })
+                                if (cf.length > 0) {
+                                    cf = cf[0]
+                                    action.text(cf.action)
+                                    destination.attr('value', cf.destination)
+                                    reset_button.attr('data-cf-id', cf.id)
+                                    reset_button.prop('disabled', false)
+                                }
+                                reset_button.click(function () {
+                                    destination.val("");
+                                    destination.on('keyup', dirtify_destination(destination, reset_button))
+                                });
+                                destination.on('keyup', dirtify_destination(destination, reset_button))
+                            }
+                        )
+                        $('body').trigger('processStop');
+
+                        let x2one_call_forwarding = $("#popup-modal-x2one-call-forwarding");
+                        x2one_call_forwarding.modal("openModal");
+                    }
+                });
+            });
+
+            function dirtify_destination(destination, reset_button) {
+                return function () {
+                    reset_button.prop('disabled', false)
+                    destination.unbind('keyup')
+                    destination.addClass('dirty')
+                }
+            }
+
+            let caller_id_response;
+            $(".check-x2one-plan-callerids").unbind('click.x2oneCallerids');
+            $(".check-x2one-plan-callerids").bind('click.x2oneCallerids', function (e) {
+                $('body').trigger('processStart');
+
+                let domainUserId = $(this).attr("data-domain-user-id");
+
+                $.ajax({
+                        url: '<?= $x2OneCIDUrl ?>' + domainUserId,
+                        type: 'GET',
+                        dataType: 'json',
+                        success: function (data, status, xhr) {
+                            caller_id_response = data;
+                            let cli_form = $('#form-cli-select')
+                            let default_clid = data.caller_ids.default_clid
+                            let options = data.dids.map(function (m) {
+                                return {value: m, text: m}
+                            })
+                            cli_form.find('.cli-select').each(function () {
+                                let selectElement = $(this);
+                                selectElement.empty();
+                                $.each(options, function (index, option) {
+                                    selectElement.append(new Option(option.text, option.value));
+                                });
+                                let name = selectElement.attr('name')
+                                let selected = data.caller_ids.items.find(item => item.cid_name === name)?.number || default_clid
+                                selectElement.val(selected)
+                            });
+
+                            let x2one_callerids_modal = $("#popup-modal-x2one-callerids")
+                            x2one_callerids_modal.modal("openModal");
+
+                            $('body').trigger('processStop');
+                            $(document).ready(function () {
+                                $('#form-cli-select').unbind('submit');
+                                $('#form-cli-select').submit(function (event) {
+                                    event.preventDefault(); // Prevent form submission
+                                    const formValues = $(this).serializeArray();
+                                    let newValues = {}//formValues.reduce(function(object, value, i){ object[value.name] = value.value ;  return object},{})
+                                    newValues.domain_user_id = domainUserId
+                                    newValues.default_caller_id = formValues[0].value
+                                    let caller_id_obj = caller_id_response.caller_ids
+                                    let principal_id = caller_id_response.principal_id
+                                    formValues.splice(1).each(function (fv) {
+                                        let done = false
+                                        caller_id_obj.items = caller_id_obj.items.map(item => {
+                                            if (item.cid_name === fv.name) {
+                                                done = true
+                                                return {...item, number: fv.value};
+                                            } else {
+                                                return item;
+                                            }
+                                        })
+                                        if (!done) {
+                                            caller_id_obj.items.push({
+                                                id: -1,
+                                                owner_id: principal_id,
+                                                status: 'on',
+                                                cid_name: fv.name,
+                                                number: fv.value,
+                                                to_remove: false
+                                            })
+                                        }
+                                        ;
+                                    });
+                                    newValues.items = caller_id_obj.items;
+                                    postX2oneUpdate(newValues, "<?= $x2OneCIDUrl?>");
+                                    x2one_callerids_modal.modal('closeModal');
+                                })
+                            })
+                        }
+                    }
+                )
+            })
+            // Code for X2oneActions
+            // This js code runs once per order item and multiple items per order may result in extra click handlers
+            // https://stackoverflow.com/a/13475122/3376305
+            $(".check-x2one-plan-actions").unbind('click.x2oneActions');
+            $(".check-x2one-plan-actions").bind('click.x2oneActions', function (e) {
+                let statusButton = $(this);
+                let action_modal = $("#popup-modal-x2one-actions")
+                let title
+                $('body').trigger('processStart');
+                var domainUserId = statusButton.attr("data-domain-user-id");
+
+                $.ajax({
+                    url: '<?= $x2OneActionsUrl ?>' + domainUserId,
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function (data, status, xhr) {
+                        if (data.status === "failed" && data.message !== "") {
+                            title += '<br><h2 style="color:red">Failed:' + data.message + '</h2><br>';
+                            action_modal.find('caption').text(title)
+                        }
+                        let endpoint_id = data.endpoint_id;
+                        action_modal.modal("openModal");
+                        updateX2oneValues(data);
+                        $('body').trigger('processStop');
+
+                        $(document).ready(function () {
+                            $('form#x2one-actions-form').unbind('submit');
+                            $('form#x2one-actions-form').submit(function (event) {
+                                event.preventDefault(); // Prevent form submission
+                                const formValues = $(this).serializeArray();
+                                const newValues = {'domain_user_id': domainUserId};
+                                $(`#${event.target.id} input[type="checkbox"]:not(:checked)`).each(function () {
+                                    formValues.push({name: this.name, value: 'unchecked'});
+                                });
+
+                                for (const row of formValues) {
+                                    if (row.name === 'voicemail') {
+                                        row.value = row.value === 'on'
+                                    }
+                                    if (row.name === 'voicemail_language') {
+                                        row.value = row.value === 'on' ? 'en' : 'he'
+                                    }
+                                    newValues[row.name] = row.value;
+                                }
+                                postX2oneUpdate(newValues, "<?= $x2OneActionsUpdateUrl?>");
+                            });
+
+                            let send_apn_url = '<?=$x2OneSendMobileActionUrl?>' + 'send_apn/endpoint_id/' + endpoint_id;
+                            buildAjaxGetRequest('#x2one-send-apn', send_apn_url);
+                            let cancel_all_locations_url = '<?=$x2OneSendMobileActionUrl?>' + 'cancel_all_locations/endpoint_id/' + endpoint_id;
+                            buildAjaxGetRequest('#x2one-action-cancel-all-locations', cancel_all_locations_url);
+                            let reregister_in_hlr_url = '<?=$x2OneSendMobileActionUrl?>' + 'reregister_in_hlr/endpoint_id/' + endpoint_id;
+                            buildAjaxGetRequest('#x2one-action-reregister-in-hlr', reregister_in_hlr_url);
+                            let unblock_kosher_msisdn_url = '<?=$x2OneSendMobileActionUrl?>' + 'unblock_kosher_msisdn/endpoint_id/' + endpoint_id;
+                            buildAjaxGetRequest('#x2one-unblock-kosher-msisdn', unblock_kosher_msisdn_url);
+                            buildAjaxGetRequest('#x2one-reset-voicemail-password', '<?=$x2OneResetVoicemailUrl?>');
+                            buildAjaxGetRequest('#x2one-delete-voicemail-messages', '<?=$x2OneResetVoicemailUrl?>/delete_messages/true');
+                            buildAjaxGetRequest('#x2one-update-user-cache', '<?=$x2OneRebuildCacheUrl?>');
+
+                        });
+                    },
+                    error: function (xhr, status, errorThrown) {
+                        console.error(errorThrown);
+                        $('body').trigger('processStop');
+                        alert("Something went wrong. Please check logs in console.");
+                    }
+                });
+            });
+        });
+    })();
+</script>

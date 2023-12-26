@@ -1,0 +1,77 @@
+<?php
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+
+/** @var \Magento\Sales\Block\Adminhtml\Order\View\Tab\History $block */
+?>
+<section class="admin__page-section edit-order-comments">
+    <div class="custom-order-comment-filter">
+        <form>
+            <div class="order-history-form">
+                <div class="admin__field">
+                    <label for="order_by" class="admin__field-label">Sort by Date</label>
+                    <div class="admin__field-control">
+                        <select name="order_by" id="order_by" class="admin__control-select">
+                          <option value="">Select Sort By</option>
+                          <option value="DESC">DESC</option>
+                          <option value="ASC">ASC</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="admin__field">
+                    <label for="user" class="admin__field-label">Select User</label>
+                    <div class="admin__field-control">
+                        <select name="user" id="user" class="admin__control-select">
+                            <option value="">Select User</option>
+                            <option value="All">All</option>
+                            
+                        </select>
+                    </div>                
+                </div>             
+            </div>             
+        </form>
+    </div>
+    <div class="custom-order-comment"><b>please select above option to see order history</b></div>
+    <ul class="note-list">
+    <?php foreach ($block->getFullHistory() as $_item) : ?>
+        <li class="note-list-item">
+            <span class="note-list-date"><?= /* @noEscape */ $block->getItemCreatedAt($_item) ?></span>
+            <span class="note-list-time"><?= /* @noEscape */ $block->getItemCreatedAt($_item, 'time') ?></span>
+            <span class="note-list-status"><?= /* @noEscape */ $block->getItemTitle($_item) ?></span>
+            <?php if ($block->isItemNotified($_item, false)) : ?>
+                <span class="note-list-customer">
+                    <?= $block->escapeHtml(__('Customer')) ?>
+                    <?php if ($block->isCustomerNotificationNotApplicable($_item)) : ?>
+                        <span class="note-list-customer-notapplicable"><?= $block->escapeHtml(__('Notification Not Applicable')) ?></span>
+                    <?php elseif ($block->isItemNotified($_item)) : ?>
+                        <span class="note-list-customer-notified"><?= $block->escapeHtml(__('Notified')) ?></span>
+                    <?php else : ?>
+                        <span class="note-list-customer-not-notified"><?= $block->escapeHtml(__('Not Notified')) ?></span>
+                    <?php endif; ?>
+                </span>
+            <?php endif; ?>
+        </li>
+    <?php endforeach; ?>
+    </ul>
+    <div class="edit-order-comments-block">
+        <div class="edit-order-comments-block-title">
+            <?= $block->escapeHtml(__('Notes for this Order')) ?>
+        </div>
+        <?php foreach ($block->getFullHistory() as $_item) : ?>
+            <?php if ($_comment = $block->getItemComment($_item)) : ?>
+                <div class="comments-block-item">
+                    <div class="comments-block-item-comment">
+                        <?= /* @noEscape */ $_comment ?>
+                    </div>
+                    <span class="comments-block-item-date-time">
+                        <?= $block->escapeHtml(__('Comment added')) ?>
+                        <?= /* @noEscape */ $block->getItemCreatedAt($_item) ?>
+                        <?= /* @noEscape */ $block->getItemCreatedAt($_item, 'time') ?>
+                    </span>
+                </div>
+            <?php endif; ?>
+        <?php endforeach; ?>
+    </div>
+</section>

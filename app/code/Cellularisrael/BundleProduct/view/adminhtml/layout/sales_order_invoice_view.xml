@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+    <!-- <referenceContainer name="content">
+        <block class="Magento\Sales\Block\Adminhtml\Order\Invoice\View\Items" name="invoice_items" template="Cellularisrael_BundleProduct::order/invoice/view/items.phtml">
+        </block>                
+    </referenceContainer>    
+    <referenceBlock name="invoice_items">
+            <block class="Magento\Bundle\Block\Adminhtml\Sales\Order\Items\Renderer" name="invoice_items.bundle" as="bundle" template="Cellularisrael_BundleProduct::sales/invoice/view/items/renderer.phtml"/>
+        </referenceBlock> -->
+
+        <referenceContainer name="content">
+        	<referenceBlock name="invoice_items">
+        		<action method="setTemplate">
+			        <argument name="template" xsi:type="string">Cellularisrael_BundleProduct::order/invoice/view/items.phtml</argument>
+			    </action>
+        	</referenceBlock>
+
+        	<referenceBlock name="invoice_items">
+	            <block class="Magento\Bundle\Block\Adminhtml\Sales\Order\Items\Renderer" name="invoice_items.bundle" as="bundle" template="Cellularisrael_BundleProduct::sales/invoice/view/items/renderer.phtml"/>
+	        </referenceBlock>        	
+        </referenceContainer>
+
+
+
+    </body> 
+</page>

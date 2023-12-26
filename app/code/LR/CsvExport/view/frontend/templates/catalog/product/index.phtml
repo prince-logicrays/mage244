@@ -1,0 +1,122 @@
+<?php
+/** @var \LR\CsvExport\Block\Template $block */
+?>
+<div class="inquiry">
+    <?php
+        // $blockInquiry = $block->getLayout()->createBlock(\LR\Customisation\Block\Inquiry\Index::class);
+    ?>
+    <div class="inquiry-button-div">
+        <button
+            type="button"
+            id="click"
+            title="<?= $block->escapeHtml(__('Enquiry Now')); ?>"
+            class="inquiry-button-class">
+            <span><?= $block->escapeHtml(__('Enquiry Now')) ?></span>
+        </button>
+    </div>
+    <div id="inquiry_form_section">
+        <fieldset class="inquiry-fieldset">
+            <div class="inquiry-fields">
+                <div class="inquiry-field firstname required">
+                    <label class="label" for="title"><span><?= $block->
+                        escapeHtmlAttr(__('First Name')) ?></span></label>
+                    <div class="control">
+                        <input name="firstname" id="firstname" title="First Name"
+                            required="true"
+                            value="<?= /* @noEscape */ /* $customerLoggedIn ? $customerData->getFirstName() :  */"" ?>"
+                            class="input-text" type="text"
+                            data-validate="{'required':true}" />
+                    </div>
+                </div>
+                <div class="inquiry-field name required">
+                    <label class="label" for="title"><span><?= $block->
+                        escapeHtmlAttr(__('Last Name')) ?></span></label>
+                    <div class="control">
+                        <input name="lastname" id="lastname" title="Last Name"
+                            value="<?= /* @noEscape */ /* $customerLoggedIn ? $customerData->getLastName() : */ "" ?>"
+                            class="input-text" type="text"
+                            data-validate="{required:true,'validate-alphanum-with-spaces':true}" />
+                    </div>
+                </div>
+                <div class="inquiry-field email required">
+                    <label class="label" for="title"><span><?= $block->
+                        escapeHtmlAttr(__('Email')) ?></span></label>
+                    <div class="control">
+                        <input name="email" id="email" title="Email"
+                            value="<?= /* @noEscape */ /* $customerLoggedIn ? $customerData->getEmail() : */ "" ?>"
+                            class="input-text" type="text"
+                            data-validate="{required:true,'validate-email':true}" />
+                    </div>
+                </div>
+                <div class="inquiry-field phone required">
+                    <label class="label" for="title"><span><?= $block->escapeHtmlAttr(__('Phone')) ?></span></label>
+                    <div class="control">
+                        <input name="phone" id="phone" title="Phone" value=""
+                            class="input-text"
+                            type="text" data-validate="{required:true,'validate-number':true}" />
+                    </div>
+                </div>
+                <div class="inquiry-field unit required">
+                    <label class="label" for="title"><span><?= $block->escapeHtmlAttr(__('Number OF Unit')) ?></span></label>
+                    <div class="control">
+                        <input name="unit" id="unit" title="Number OF Unit" value=""
+                            class="input-text"
+                            type="text" data-validate="{required:true,'validate-number':true}" />
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+        <div class="inquiry-submit">
+            <input class="inquiry-submit-button" id="inquiry-submit-button"
+                name="submit" type="button" value="Submit Enquiry"/>
+        </div>
+    </div>
+</div>
+
+<script>
+    require([
+        'jquery',
+        'jquery/ui'
+        ], function($) {
+        'use strict';
+        $('#inquiry_form_section').hide();
+        $('#click').on('click', function () {
+            $('#inquiry_form_section').toggle();
+        });
+        $(document).on('click', '#inquiry-submit-button', function(e) {
+            if ($('#firstname').valid()) {
+                var firstname = $("input[name='firstname']").val();
+                var lastname = $("input[name='lastname']").val();
+                var email = $("input[name='email']").val();
+                var phone = $("input[name='phone']").val();
+                var unit = $("input[name='unit']").val();
+
+                var product = "<?php /* @noEscape */ /* $blockInquiry->getCurrentProduct() */ ?>";
+                var productUrl = "<?php /* @noEscape */ /* $blockInquiry->getProductUrlData()->getProductUrl() */ ?>";
+                var url = "<?= /* @noEscape */ $block->getBaseUrl().'csvexport/ajax/form/' ?>";
+                $.ajax({
+                    url: url,
+                    type: "POST",
+                    data: {
+                        firstname:firstname,
+                        lastname:lastname,
+                        email:email,
+                        phone:phone,
+                        unit:unit,
+                        product:product,
+                        productUrl:productUrl,
+                    },
+                    showLoader: true,
+                    cache: false,
+                    success: function(response) {
+                        console.log(response.output);
+                        if (response.success === true) {
+                            window.location.reload();
+                        }
+                    }
+                });
+                return false;
+            }
+        });
+    });
+</script>

@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" layout="admin-1column" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+  <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script> -->
+  <body>
+    <referenceContainer name="content">
+      <block class="Logicrays\ManageCategoryImage\Block\Adminhtml\ManageCategoryImage\EditCategoryImage" name="lr_editcategoryimage" template="Logicrays_ManageCategoryImage::EditCategoryImage.phtml" />
+    </referenceContainer>
+  </body>
+</page>

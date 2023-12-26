@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="catalog_product_bundle_selection" resource="default" engine="innodb" comment="Catalog Product Bundle Selection">
+        <column xsi:type="text" name="bundle_popup_message" nullable="true" comment="Bundle Option Popup Message"/>
+    </table>
+    <table name="catalog_product_bundle_option_value" resource="default" engine="innodb" comment="Catalog Product Bundle Option Value">
+        <column xsi:type="text" name="store_description" nullable="true" comment="Store Description"/>
+    </table>
+</schema>
