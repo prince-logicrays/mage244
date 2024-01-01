@@ -32,7 +32,7 @@ class DepositSaveToQuote implements ObserverInterface
         $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
         $checkoutSession = $objectManager->create('\Magento\Checkout\Model\Session')->getQuote();
 
-        $writer = new \Zend_Log_Writer_Stream(BP . '/var/log/prince.log');
+        $writer = new \Zend_Log_Writer_Stream(BP . '/var/log/prince-test.log');
         $logger = new \Zend_Log();
         $logger->addWriter($writer);
         $logger->info(print_r($getDeposite->getData(), true));
