@@ -18,6 +18,9 @@ define(
             },
             checkCustomDeposit: function () {
                 return window.checkoutConfig.customDeposit;
+            },
+            getDiscountName: function () {
+                return window.checkoutConfig.getDiscountName;
             }
         });
     }

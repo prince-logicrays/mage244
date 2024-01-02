@@ -21,6 +21,12 @@
                         <field id="newsletter_discount/discount/enable">1</field>
                     </depends>
                 </field>
+                <field id="discount_name" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Discount Name</label>
+                    <depends>
+                        <field id="newsletter_discount/discount/enable">1</field>
+                    </depends>
+                </field>
             </group>
         </section>
     </system>

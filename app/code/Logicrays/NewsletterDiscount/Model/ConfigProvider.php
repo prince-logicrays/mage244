@@ -11,6 +11,8 @@ class ConfigProvider implements ConfigProviderInterface
 {
     public const XML_MODULE_STATUS = "newsletter_discount/discount/enable";
 
+    public const XML_MODULE_DISCOUNT_NAME = "newsletter_discount/discount/discount_name";
+
     /**
      * @var ScopeConfigInterface
      */
@@ -45,9 +47,11 @@ class ConfigProvider implements ConfigProviderInterface
         if ($moduleIsEnabled && $subscriber->isSubscribed()) {
             $config['moduleStatus'] = true;
             $config['customDeposit'] = true;
+            $config['getDiscountName'] = $this->getDiscountName(self::XML_MODULE_DISCOUNT_NAME);
         } else {
             $config['moduleStatus'] = false;
             $config['customDeposit'] = false;
+            $config['getDiscountName'] = false;
         }
         return $config;
     }
@@ -59,6 +63,20 @@ class ConfigProvider implements ConfigProviderInterface
      * @return void
      */
     public function checkIsModuleEnabled($path)
+    {
+        return $this->_scopeConfig->getValue(
+            $path,
+            \Magento\Store\Model\ScopeInterface::SCOPE_STORE
+        );
+    }
+
+    /**
+     * Get discount name
+     *
+     * @param string $path
+     * @return void
+     */
+    public function getDiscountName($path)
     {
         return $this->_scopeConfig->getValue(
             $path,

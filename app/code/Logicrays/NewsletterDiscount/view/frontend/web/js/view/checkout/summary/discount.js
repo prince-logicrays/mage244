@@ -21,6 +21,7 @@ define(
                 var price = 0;
                 if (this.totals()) {
                     price = totals.getSegment('custom_discount').value;
+                    console.log(price);
                 }
                 return this.getFormattedPrice(price);
             },
