@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <type name="Magento\Customer\Model\Customer\DataProviderWithDefaultAddresses">
+        <plugin sortOrder="10" name="customer_get_manage_students" type="Logicrays\ManageStudent\Plugin\Customer\DataProviderWithDefaultAddresses" />
+    </type>
+</config>

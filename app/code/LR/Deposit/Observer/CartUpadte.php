@@ -5,7 +5,6 @@ namespace LR\Deposit\Observer;
 use Magento\Framework\Event\ObserverInterface;
 use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Framework\Serialize\SerializerInterface;
-use Magento\Catalog\Model\ProductRepository;
 use Magento\Framework\App\RequestInterface;
 use Magento\Quote\Model\QuoteRepository;
 use Magento\Quote\Model\QuoteFactory;
@@ -47,14 +46,12 @@ class CartUpadte implements ObserverInterface
     public function __construct(
         CheckoutSession $checkoutSession,
         SerializerInterface $serializer,
-        ProductRepository $productRepository,
         RequestInterface $request,
         QuoteRepository $quoteRepository,
         QuoteFactory $quoteFactory
     ) {
         $this->checkoutSession = $checkoutSession;
         $this->serializer = $serializer;
-        $this->productRepository = $productRepository;
         $this->_request = $request;
         $this->quoteRepository = $quoteRepository;
         $this->quoteFactory = $quoteFactory;
@@ -68,20 +65,16 @@ class CartUpadte implements ObserverInterface
      */
     public function execute(\Magento\Framework\Event\Observer $observer)
     {
-        $items = $observer->getEvent()->getCart()->getQuote()->getItems();
-        $quote = $this->checkoutSession->getQuote();
-        $item = $quote->getItemById($itemId);
-        $product = $this->productRepository->getById($item->getProductId());
-        $currentProductDeposit = $product->getDeposit();
-
-        $getDeposit = $quote->getDeposit();
-        $quoteId = $quote->getId();
-        $quoteData = $this->quoteFactory->create()->load($quoteId);
-        $oldDeposit = $quoteData->getDeposit();
-        $allDeposit = $oldDeposit - $currentProductDeposit;
-
-        $quote = $this->quoteRepository->get($quoteId);
-        $quote->setDeposit($allDeposit);
-        $this->quoteRepository->save($quote);
+        $quote = $observer->getEvent()->getCart()->getQuote();
+        $items = $quote->getItems();
+        $depositValues = 0;
+        foreach ($items as $item) {
+            $deposit = $item->getDeposit();
+            $getQty = $item->getQty();
+            $totalDeposit = $deposit * $getQty;
+            $depositValues += $totalDeposit;
+        }
+        $quote->setDeposit($depositValues);
+        $quote->save();
     }
 }

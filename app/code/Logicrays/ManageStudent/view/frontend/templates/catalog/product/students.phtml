@@ -1,0 +1,57 @@
+<?php
+$_product = $block->getProduct();
+$productId = $_product->getId();
+
+$viewModel = $block->getData('view_model');
+$helper = $viewModel->getHelperData();
+$moduleEnable = $helper->isEnabled();
+$isCustomerLoggedIn = $viewModel->isCustomerLoggedIn();
+$studentData = $viewModel->getManageStudentCollection();
+
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+$cart = $objectManager->get('\Magento\Checkout\Model\Cart');
+$prodId = $this->getRequest()->getParam('product_id');
+
+$items = $cart->getQuote()->getAllItems();
+$infoRqstArray = [];
+if($prodId)
+{
+    $itemId = $this->getRequest()->getParam('id');
+    $items = $cart->getQuote()->getAllItems();
+    $abc = [];
+    foreach ($items as $item) 
+    {
+      if ($item->getId() == $itemId) 
+      {
+        $infoRqst = $item->getBuyRequest();
+        if(isset($infoRqst['students']))
+        {
+            $infoRqstArray = $infoRqst['students'];
+        }
+      }
+    }
+}
+?>
+<?php if ($moduleEnable == 1 /* && $isCustomerLoggedIn */): ?>
+  <?php if (count($studentData)): ?>
+    <div id="accordion" class="student-required-wrapper" data-mage-init='{
+            "accordion":{
+                "collapsible": true,
+                "openedState": "active"
+            }}'>
+        <div data-role="collapsible" class="student-required-data">
+            <div data-role="trigger" class="student-required-title">
+                <span>Please select a student</span>
+            </div>
+        </div>
+        <div data-role="content" class="student-required-content">
+                <?php foreach ($studentData as $student): ?>
+                  <div class="custom-select-option">
+                    <input class="custom-select-option-checkbox" type="checkbox" <?php if(in_array($student->getId(), $infoRqstArray)):  echo "checked='checked'"; endif; ?>
+                      name="students[]" id="<?php  echo $student->getFirstName(); ?>" value="<?php  echo $student->getId(); ?>"><?php  echo $student->getFirstName() . " " . $student->getLastName(); ?>
+                  </div>
+                <?php endforeach; ?>
+        </div>
+    </div>
+  <?php endif; ?>
+<?php endif; ?>

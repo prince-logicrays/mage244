@@ -1,0 +1,58 @@
+<?php
+$studentsView = $block->getData('managestudent_students');
+?>
+
+<div class="block block-managestudents-list">
+    <div class="block-title"><strong><?= $block->escapeHtml(__('Manage Students')) ?></strong></div>
+    <div class="block-content">
+        <?php if ($_students = $block->getManageStudentCollection()): ?>
+
+            <div class="table-wrapper managestudents">
+                <table class="data table table-managestudents-items history" id="managestudents-table">
+                    <caption class="table-caption"><?= /* @escapeNotVerified */ __('Manage Students') ?></caption>
+                    <thead>
+                    <tr>
+                        <th scope="col" class="col email"><?= /* @escapeNotVerified */ __('Email') ?></th>
+                        <th scope="col" class="col first_name"><?= /* @escapeNotVerified */ __('First Name') ?></th>
+                        <th scope="col" class="col last_name"><?= /* @escapeNotVerified */ __('Last Name') ?></th>
+                        <th scope="col" class="col grade"><?= /* @escapeNotVerified */ __('Grade') ?></th>
+                        <th scope="col" class="col status"><?= /* @escapeNotVerified */ __('Status') ?></th>
+                        <th scope="col" class="col actions"><?= /* @escapeNotVerified */ __('Actions') ?> </th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <?php foreach ($_students as $student): ?>
+                        <tr>
+                            <td data-th="<?= $block->escapeHtml(__('Email')) ?>" class="col email"><?= $student->getEmail() ?></td>
+                            <td data-th="<?= $block->escapeHtml(__('First Name')) ?>" class="col first_name"><?= $block->escapeHtml($student->getFirstName()) ?></td>
+                            <td data-th="<?= $block->escapeHtml(__('Last Name')) ?>" class="col last_name"><?= $block->escapeHtml($student->getLastName()) ?></td>
+                            <td data-th="<?= $block->escapeHtml(__('Grade')) ?>" class="col grade"><?= $block->escapeHtml($student->getGrade()) ?></td>
+                            <td data-th="<?= $block->escapeHtml(__('Status')) ?>" class="col status">
+                                <?php
+                                    if ($student->getStatus() == 0) { echo "Inactive"; } else { echo "Active"; } ?></td>
+                            <td data-th="<?= $block->escapeHtml(__('Actions')) ?>" class="col actions">
+                                <a class="action edit" href="<?= $block->escapeUrl($block->getUrl('managestudent/student/edit', ['id' => $student->getId()])) ?>"><span><?= $block->escapeHtml(__('Edit')) ?></span></a>
+                                <a class="action delete" href="<?= $block->escapeUrl($block->getDeleteUrl($student->getId())) ?>"><span><?= $block->escapeHtml(__('Delete')) ?></span></a>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+            <?php if ($block->getChildHtml('pager')): ?>
+                <div class="customer-accounts-toolbar toolbar bottom"><?= $block->getChildHtml('pager') ?></div>
+            <?php endif ?>
+        <?php else: ?>
+            <p class="empty"><?= $block->escapeHtml(__('You have no stored new students entries.')) ?></p>
+        <?php endif ?>
+    </div>
+</div>
+
+<div class="actions-toolbar">
+    <div class="primary">
+        <button type="button" onclick="window.location = '<?= $block->getAddStudentUrl(); ?>';" title="<?= $block->escapeHtmlAttr(__('Add New Student')) ?>" class="action primary add"><span><?= $block->escapeHtml(__('Add New Student')) ?></span></button>
+    </div>
+    <div class="secondary">
+        <a class="action back" href="<?= $block->escapeUrl($block->getBackUrl()) ?>"><span><?= $block->escapeHtml(__('Back')) ?></span></a>
+    </div>
+</div>

@@ -33,6 +33,8 @@ class DepositSaveToQuote implements ObserverInterface
     {
         $item = $observer->getEvent()->getData('quote_item');
         $getDeposit = $item->getProduct()->getDeposit();
+        $item->setDeposit($getDeposit);
+        $item->save();
         $quoteId = $item->getQuoteId();
         $quoteData = $this->quoteFactory->create()->load($quoteId);
         $oldDeposit = $quoteData->getDeposit();

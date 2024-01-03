@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <head>
+        <css src="Logicrays_ManageStudent::css/styles.css" />
+    </head>
+    <body>
+        <referenceBlock name="product.info.form.content">
+            <block class="Magento\Catalog\Block\Product\View" name="catalog.product.view.extrablock" template="Logicrays_ManageStudent::catalog/product/students.phtml" before="product.info.addtocart">
+                <arguments>
+                    <argument name="view_model" xsi:type="object">Logicrays\ManageStudent\ViewModel\Student</argument>
+                </arguments>
+            </block>
+        </referenceBlock>
+        <!-- <move element="catalog.product.view.extrablock" destination="product.info.form.options" after="product.info.options.wrapper"/> -->
+    </body>
+</page>

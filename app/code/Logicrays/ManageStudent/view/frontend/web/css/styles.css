@@ -1,0 +1,110 @@
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+
+.switch input { 
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.chk:checked + .slider {
+  background-color: #2196F3;
+}
+
+.chk:focus + .slider {
+  box-shadow: 0 0 1px #2196F3;
+}
+
+.chk:checked + .slider:before {
+  -webkit-transform: translateX(26px);
+  -ms-transform: translateX(26px);
+  transform: translateX(26px);
+}
+
+/* Rounded sliders */
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+
+.student-required-wrapper
+{
+    display: inline-block;
+    width: 100%;
+    margin-top: 12px;
+    margin-bottom: 10px
+}
+  .student-required-data{
+    background: #e7e7e8;
+    font-size: 14px;
+    font-family: 'Lato', sans-serif;
+    font-weight: bold;
+    padding: 5px 30px;
+    cursor: pointer;
+    position: relative;
+  }
+.custom-select-option{
+        border-bottom: 1px solid #e7e7e8;
+    padding: 10px;
+    display: inline-block;
+    width: 100%;
+    margin-bottom: 5px;
+    font-size: 14px;
+    color: #000000;
+    position: relative;
+}
+.student-required-content
+{
+      border: 2px solid #e7e7e8;
+    padding: 20px;
+    margin-top: 1px;
+}
+.custom-select-option:last-child
+{
+      border-bottom: 0;
+    margin-bottom: 0;
+}
+.student-required-wrapper .student-required-data .student-required-title:after {
+  content: '\e622';
+  font-family: 'luma-icons';
+  font-size: 10px;
+  color: #000000;
+  float: right;
+  position: absolute;
+  right: 15px;
+  top: 8px;
+}
+.student-required-wrapper .student-required-data.active .student-required-title:after {
+  content: '\e621';
+}

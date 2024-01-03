@@ -1,0 +1,98 @@
+<form class="form-student"
+      action="<?= $block->escapeUrl($block->getSaveUrl()) ?>"
+      method="post"
+      id="form-student"
+      enctype="multipart/form-data"
+      data-hasrequired="<?= $block->escapeHtmlAttr(__('* Required Fields')) ?>"
+      autocomplete="off">
+    <fieldset class="fieldset info">
+        <legend class="legend"><span><?= $block->escapeHtml(__('Student Information')) ?></span></legend><br>
+        <?= $block->getBlockHtml('formkey') ?>
+        <input type="hidden" name="success_url" value="<?= $block->escapeUrl($block->getSuccessUrl()) ?>">
+        <input type="hidden" name="error_url" value="<?= $block->escapeUrl($block->getErrorUrl()) ?>">
+        <div class="field email required">
+            <label for="email" class="label">
+                <span><?= __("Email Address"); ?></span>
+            </label>
+            <div class="control">
+            <input type="text"
+                    name="email"
+                    value="<?= $block->escapeHtmlAttr($block->getEmail()->getEmail()) ?>"
+                    title="<?= __("Email Address"); ?>"
+                    class="input-text required"
+                    data-validate="{required:true, 'validate-email':true}"
+                    id="email">
+            </div>
+        </div>
+        <div class="field first_name required">
+            <label class="label" for="first_name"><span><?= __("First Name"); ?></span></label>
+            <div class="control">
+                <input type="text"
+                    name="first_name"
+                    value="<?= $block->escapeHtmlAttr($block->getEmail()->getFirstName()) ?>"
+                    title="<?= __("First Name"); ?>"
+                    class="input-text required"
+                    data-validate="{required:true}"
+                    id="first_name">
+            </div>
+        </div>
+        <div class="field last_name required">
+            <label class="label" for="l_name"><span><?= __("Last Name"); ?></span></label>
+            <div class="control">
+                <input type="text"
+                    name="last_name"
+                    value="<?= $block->escapeHtmlAttr($block->getEmail()->getLastName()) ?>"
+                    title="<?= __("Last Name"); ?>"
+                    class="input-text required"
+                    data-validate="{required:true}"
+                    id="last_name">
+            </div>
+        </div>
+        <div class="field grade required">
+            <label class="label" for="name"><span><?= __("Grade"); ?></span></label>
+            <div class="control">
+                <input type="text"
+                    name="grade"
+                    value="<?= $block->escapeHtmlAttr($block->getEmail()->getGrade()) ?>"
+                    title="<?= __("Grade"); ?>"
+                    class="input-text required"
+                    data-validate="{required:true, 'validate-number':true}"
+                    id="grade">
+            </div>
+        </div>
+        <div class="field status ">
+            <label class="label" for="name"><span><?= __("Status"); ?></span></label>
+            <label class="switch">
+            <input type="checkbox"
+                name="status"
+                <?php if($block->getEmail()->getStatus()): ?>CHECKED<?php endif; ?>
+                value="0"
+                class="input-checkbox chk"
+                id="status">
+                <span class="slider round"></span>
+            </label>
+        </div>
+    </fieldset>
+    <div class="actions-toolbar">
+        <div class="primary">
+            <button type="submit"
+                    class="action save primary"
+                    data-action="save-student"
+                    title="<?= $block->escapeHtmlAttr(__('Save Student')) ?>">
+                <span><?= $block->escapeHtml(__('Save Student')) ?></span>
+            </button>
+        </div>
+        <div class="secondary">
+            <a class="action back" href="<?= $block->escapeUrl($block->getBackUrl()) ?>">
+                <span><?= $block->escapeHtml(__('Go back')) ?></span>
+            </a>
+        </div>
+    </div>
+</form>
+<script type="text/x-magento-init">
+    {
+        "#form-student": {
+            "validation": {}
+        }
+    }
+</script>
