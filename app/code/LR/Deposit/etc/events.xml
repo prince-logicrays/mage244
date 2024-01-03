@@ -1,9 +1,12 @@
 <?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
-    <!-- <event name="sales_quote_product_add_after">
-        <observer name="add_deposit_column_to_quote" instance="LR\Deposit\Observer\QuoteAddDepositItem" />
-    </event> -->
     <event name="checkout_cart_product_add_after">
         <observer name="add_deposit_column_to_quote" instance="LR\Deposit\Observer\DepositSaveToQuote" />
     </event>
+    <event name="controller_action_predispatch_checkout_cart_delete">
+        <observer name="add_deposit_column_to_quote" instance="LR\Deposit\Observer\CartDelete" />
+    </event>
+    <!-- <event name="checkout_cart_update_items_after">
+        <observer name="add_deposit_column_to_quote" instance="LR\Deposit\Observer\CartUpadte" />
+    </event> -->
 </config>

@@ -52,8 +52,7 @@ class Deposit extends \Magento\Quote\Model\Quote\Address\Total\AbstractTotal
 
         $moduleEnable = $this->helper->isEnable();
         if ($moduleEnable == 1) {
-            $deposit = $this->helper->getProductCollection();
-            $balance = $deposit;
+            $balance = $quote->getDeposit();
             $total->setTotalAmount('deposit', $balance);
             $total->setBaseTotalAmount('deposit', $balance);
             $total->setDeposit($balance);
@@ -80,7 +79,7 @@ class Deposit extends \Magento\Quote\Model\Quote\Address\Total\AbstractTotal
         return [
             'code' => 'deposit',
             'title' => 'Deposit',
-            'value' => $this->helper->getProductCollection()
+            'value' => $quote->getDeposit()
         ];
     }
 
