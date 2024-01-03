@@ -4,6 +4,7 @@ namespace Logicrays\NewsletterDiscount\Model\Total;
 
 use Magento\Newsletter\Model\SubscriberFactory;
 use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Sales\Model\ResourceModel\Order\CollectionFactory;
 
 class Discount extends \Magento\Quote\Model\Quote\Address\Total\AbstractTotal
 {
@@ -20,15 +21,18 @@ class Discount extends \Magento\Quote\Model\Quote\Address\Total\AbstractTotal
      * @param \Magento\Quote\Model\QuoteValidator $quoteValidator
      * @param SubscriberFactory $subscriberFactory
      * @param ScopeConfigInterface $scopeConfig
+     * @param CollectionFactory $orderCollectionFactory
      */
     public function __construct(
         \Magento\Quote\Model\QuoteValidator $quoteValidator,
         SubscriberFactory $subscriberFactory,
-        ScopeConfigInterface $scopeConfig
+        ScopeConfigInterface $scopeConfig,
+        CollectionFactory $orderCollectionFactory
     ) {
         $this->quoteValidator = $quoteValidator;
         $this->subscriberFactory = $subscriberFactory;
         $this->_scopeConfig = $scopeConfig;
+        $this->orderCollectionFactory = $orderCollectionFactory;
     }
 
     /**
@@ -52,13 +56,20 @@ class Discount extends \Magento\Quote\Model\Quote\Address\Total\AbstractTotal
             if (!$customerId) {
                 return;
             }
+            $startDate = date("Y-m-d h:i:s", strtotime('2024-01-02'));
+            $orderData = $this->orderCollectionFactory->create()->addFieldToSelect(
+                '*'
+            )->addFieldToFilter(
+                'customer_id',
+                $customerId
+            )->addAttributeToFilter('created_at', ['from'=>$startDate]);
+            $orderCount = count($orderData);
             $subscriber = $this->subscriberFactory->create()->loadByCustomerId($customerId);
-            if ($subscriber->isSubscribed()) {
+            if ($subscriber->isSubscribed() && $orderCount == 0) {
                 $total->setCustomDiscount($getDiscountPrice);
                 $total->setBaseCustomDiscount($getDiscountPrice);
                 $total->setGrandTotal($total->getGrandTotal() - $getDiscountPrice);
                 $total->setBaseGrandTotal($total->getBaseGrandTotal() - $getDiscountPrice);
-
                 return $this;
             }
         }
