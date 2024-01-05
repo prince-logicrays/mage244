@@ -9,4 +9,7 @@
     <event name="checkout_cart_update_items_after">
         <observer name="add_deposit_column_to_quote" instance="LR\Deposit\Observer\CartUpadte" />
     </event>
+    <event name="checkout_cart_product_update_after">
+        <observer name="add_deposit_column_to_quote" instance="LR\Deposit\Observer\ProductCartUpadte" />
+    </event>
 </config>
