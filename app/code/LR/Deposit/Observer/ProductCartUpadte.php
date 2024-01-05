@@ -66,7 +66,6 @@ class ProductCartUpadte implements ObserverInterface
     public function execute(\Magento\Framework\Event\Observer $observer)
     {
         $item = $observer->getQuoteItem();
-
         $itemDeposit = $item->getDeposit();
         $getQty = $item->getQty();
         $quoteId = $item->getQuoteId();
